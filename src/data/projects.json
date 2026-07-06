@@ -1,0 +1,93 @@
+{
+  "note": "Single source of truth for the projects section. Update this file alongside the weekly scoreboard; the site rebuilds on push. Statuses: shipped | in-build | planned. Signals must be true before they are listed.",
+  "projects": [
+    {
+      "name": "Job Market Insights Dashboard",
+      "slug": "job-market-insights",
+      "status": "shipped",
+      "tagline": "9,000+ AU entry-level IT job ads, scraped and analysed",
+      "description": "Scraped and structured over nine thousand Australian entry-level IT job advertisements, then built dashboards cutting the market by role, city, and skill demand.",
+      "stack": [
+        "Python",
+        "Web scraping",
+        "Pandas",
+        "Dashboards"
+      ],
+      "signals": [
+        "DATA 9K+"
+      ],
+      "repo": "https://github.com/yousufagha/ITW601",
+      "demo": null
+    },
+    {
+      "name": "Beats by Dre Consumer Insights",
+      "slug": "beats-externship",
+      "status": "shipped",
+      "tagline": "Sentiment analysis across 1,200+ reviews, 8 products, 5 markets",
+      "description": "End-to-end sentiment pipeline (NLTK VADER, TextBlob) over Amazon review data for a global audio brand, with a dedicated AU/NZ market analysis and four data-backed recommendations delivered as a capstone report.",
+      "stack": [
+        "Python",
+        "NLTK",
+        "TextBlob",
+        "Matplotlib",
+        "Seaborn"
+      ],
+      "signals": [
+        "EXTERNSHIP",
+        "CAPSTONE"
+      ],
+      "repo": "https://github.com/yousufagha/beats-by-dre-externship",
+      "demo": null
+    },
+    {
+      "name": "Runway Radar",
+      "slug": "runway-radar",
+      "status": "shipped",
+      "tagline": "Fashion trend detection from runway imagery and editorial text",
+      "description": "Dual-pipeline trend spotter: CLIP-style visual embeddings and palette extraction on runway images, transformer and VADER sentiment on editorial text, combined into rising-versus-declining trend scores for styles, colours, and brands.",
+      "stack": [
+        "Python",
+        "CLIP embeddings",
+        "Transformers",
+        "Plotly"
+      ],
+      "signals": [
+        "MULTI-MODAL"
+      ],
+      "repo": "https://github.com/yousufagha/runway-radar",
+      "demo": null
+    },
+    {
+      "name": "localRAG",
+      "slug": "localrag",
+      "status": "shipped",
+      "tagline": "Retrieval-augmented generation, run locally",
+      "description": "A local retrieval-augmented generation pipeline: document ingestion, embedding, retrieval, and grounded answering without cloud dependencies.",
+      "stack": [
+        "Python",
+        "RAG",
+        "Embeddings"
+      ],
+      "signals": [],
+      "repo": "https://github.com/yousufagha/localRAG",
+      "demo": null
+    },
+    {
+      "name": "daily-practice",
+      "slug": "daily-practice",
+      "status": "shipped",
+      "tagline": "Public log of DS/ML screening reps",
+      "description": "A running, dated log of LeetCode-style data science screening problems and Kaggle competition work: SQL window functions, pandas manipulation, statistics, and the patterns that actually appear in DS/ML interviews.",
+      "stack": [
+        "Python",
+        "SQL",
+        "Kaggle"
+      ],
+      "signals": [
+        "DAILY"
+      ],
+      "repo": "https://github.com/yousufagha/daily-practice",
+      "demo": null
+    }
+  ]
+}
