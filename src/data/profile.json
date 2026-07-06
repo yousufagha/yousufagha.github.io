@@ -1,0 +1,85 @@
+{
+  "name": "Yousuf Agha",
+  "role": "AI engineer and data scientist",
+  "location": "Melbourne, Australia",
+  "verdict": "Ships LLM products end to end: from the OpenAI API and Python through to client-facing delivery.",
+  "evidence": [
+    {
+      "label": "WORK RIGHTS",
+      "value": "Full Australian work rights to March 2029, no sponsorship required (subclass 485)"
+    },
+    {
+      "label": "SHIPPED",
+      "value": "Production LLM proofs-of-concept for education and insurance clients at Raen AI, Dubai"
+    },
+    {
+      "label": "DEPTH",
+      "value": "GPT fine-tuning, NLP, RAG, evals, plus cloud exposure across Azure, AWS, and GCP"
+    },
+    {
+      "label": "EDUCATION",
+      "value": "Master of IT (Advanced), Torrens University, Melbourne"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Systems Analyst",
+      "org": "Remunera",
+      "place": "Melbourne, Australia",
+      "period": "Mar 2025 — present",
+      "points": [
+        "Built analytics dashboards and performance-tracking pipelines guiding data-driven content and client-targeting decisions",
+        "Optimised CRM and sales-pipeline workflows with cross-functional stakeholders to lift response rates and reduce conversion friction"
+      ]
+    },
+    {
+      "role": "Data Scientist",
+      "org": "Raen AI",
+      "place": "Dubai, UAE (on-site, then remote from Melbourne)",
+      "period": "Nov 2023 — Jan 2025",
+      "points": [
+        "Built and shipped AI proofs-of-concept for clients in education and insurance, from business goals to working prototypes",
+        "Fine-tuned GPT-based models for conversational interfaces and knowledge assistants using the OpenAI API, Python, and Streamlit",
+        "Aligned AI prototypes with user experience and feasibility across engineering and business teams"
+      ]
+    },
+    {
+      "role": "Data Insights Associate",
+      "org": "Lock and Stock",
+      "place": "Dubai, UAE",
+      "period": "Feb 2021 — Sep 2021",
+      "points": [
+        "Coordinated collection of 3,000+ academic content items with structured handoff for quality assurance and publication",
+        "Cleaned and validated data across multiple tools, resolving 40+ duplication and formatting issues"
+      ]
+    }
+  ],
+  "certifications": [
+    "Google Data Analytics Specialisation — Google, 2025",
+    "Azure AI for Developers: Process Images with Azure AI — LinkedIn Learning, 2025",
+    "OpenAI API: Fine-Tuning — LinkedIn Learning, 2024",
+    "LLMs: Text Classification for NLP using BERT — LinkedIn Learning, 2024",
+    "Introduction to Prompt Engineering for Generative AI — LinkedIn Learning, 2023"
+  ],
+  "contact": {
+    "email": "yousufagha@gmail.com",
+    "github": "https://github.com/yousufagha",
+    "linkedin": "https://www.linkedin.com/in/yousuf-agha/",
+    "x": "https://x.com/drsmartfish"
+  },
+  "scholar": "https://scholar.google.com/citations?hl=en&user=RZ_ToiwAAAAJ",
+  "publications": [
+    {
+      "title": "The Application of HCI in Industry and IT",
+      "authors": "Taher M. Ghazal, Mohammad Kamrul Hasan, Haitham M. Alzoubi, Nidal A. Al-Dmour, Alya Alsuwaidi, Yousuf Agha",
+      "venue": "14th International Conference on Mathematics, Actuarial Science, Computer Science and Statistics (MACS 2022), IEEE, Karachi",
+      "year": "2022"
+    },
+    {
+      "title": "Activity Based Easy Learning of PushDown Automata",
+      "authors": "Liaqat Ali, Nizar Sahawneh, Yousuf Agha, Saira Kanwal, Imran, Nouh Sabri Elmitwally",
+      "venue": "2022 International Conference on Cyber Resilience (ICCR), IEEE, Dubai",
+      "year": "2022"
+    }
+  ]
+}
