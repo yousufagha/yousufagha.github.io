@@ -1,0 +1,336 @@
+---
+import profile from '../data/profile.json';
+import projectData from '../data/projects.json';
+
+const { projects } = projectData;
+const built = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Australia/Melbourne' });
+const statusLabel = { 'shipped': 'SHIPPED', 'in-build': 'IN BUILD', 'planned': 'PLANNED' };
+const sections = [
+  { id: 'projects', n: '01' },
+  { id: 'experience', n: '02' },
+  { id: 'publications', n: '03' },
+  { id: 'certifications', n: '04' },
+  { id: 'writing', n: '05' },
+  { id: 'contact', n: '06' },
+];
+---
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yousuf Agha — AI engineer and data scientist, Melbourne</title>
+  <meta name="description" content="AI engineer and data scientist in Melbourne. Ships LLM products end to end: fine-tuning, RAG, evals, and client-facing delivery. Full Australian work rights to 2029." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style is:global>
+    :root {
+      --paper: #FAFAF7;
+      --ink: #131D19;
+      --ink-2: #1B2823;
+      --ink-soft: #43514B;
+      --paper-soft: #B8C4BD;
+      --pass: #1E7A5A;
+      --pass-bright: #35C08D;
+      --amber: #A96D00;
+      --amber-bright: #E8A93B;
+      --hairline: #DCE0DA;
+      --hairline-dark: #2C3B34;
+      --card: #FFFFFF;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    body {
+      background-color: var(--paper);
+      background-image:
+        linear-gradient(to right, rgba(30,122,90,0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(30,122,90,0.05) 1px, transparent 1px);
+      background-size: 28px 28px;
+      color: var(--ink);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.0625rem;
+      line-height: 1.65;
+    }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 0 1.5rem; }
+    ::selection { background: var(--pass); color: var(--paper); }
+
+    /* ---------- Top bar ---------- */
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(19,29,25,0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--hairline-dark);
+      padding: 0.8rem 0;
+    }
+    .topbar .wrap { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .brand { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; color: var(--paper-soft); display: flex; align-items: center; gap: 0.6rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pass-bright); box-shadow: 0 0 0 0 rgba(53,192,141,0.5); }
+    @media (prefers-reduced-motion: no-preference) {
+      .dot { animation: pulse 2.2s ease-out infinite; }
+      @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(53,192,141,0.5); } 70% { box-shadow: 0 0 0 9px rgba(53,192,141,0); } 100% { box-shadow: 0 0 0 0 rgba(53,192,141,0); } }
+    }
+    .brand .open { color: var(--pass-bright); }
+    .topbar nav { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+    .topbar nav a {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.08em;
+      color: var(--paper-soft); text-decoration: none; position: relative; padding-bottom: 2px;
+    }
+    .topbar nav a::after {
+      content: ''; position: absolute; left: 0; bottom: 0; height: 1px; width: 100%;
+      background: var(--pass-bright); transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease;
+    }
+    .topbar nav a:hover, .topbar nav a:focus-visible { color: #fff; }
+    .topbar nav a:hover::after, .topbar nav a:focus-visible::after { transform: scaleX(1); }
+
+    /* ---------- Hero: inked evaluation panel ---------- */
+    .hero-band { background: var(--ink); color: var(--paper); border-bottom: 3px solid var(--pass); }
+    .hero { padding: 5rem 0 3.6rem; }
+    .eyebrow {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.16em;
+      color: var(--pass-bright); margin-bottom: 1.3rem; display: flex; align-items: center; gap: 0.7rem;
+    }
+    .eyebrow::before { content: ''; width: 2.2rem; height: 1px; background: var(--pass-bright); }
+    h1 {
+      font-family: 'Archivo', sans-serif; font-weight: 900;
+      font-size: clamp(2.9rem, 8.5vw, 5.6rem);
+      letter-spacing: -0.03em; line-height: 0.98; margin-bottom: 1.6rem;
+      text-transform: uppercase;
+    }
+    h1 .mark { color: var(--pass-bright); }
+    .verdict {
+      font-size: clamp(1.15rem, 2.4vw, 1.45rem); line-height: 1.5; max-width: 44ch;
+      color: #E9EDEA; margin-bottom: 2.8rem;
+      border-left: 3px solid var(--pass-bright); padding-left: 1.2rem;
+    }
+    .verdict strong { font-weight: 600; color: #fff; }
+    .ledger { border-top: 1px solid var(--paper-soft); }
+    .ledger-row {
+      display: grid; grid-template-columns: 10rem 1fr; gap: 1rem;
+      padding: 0.85rem 0; border-bottom: 1px solid var(--hairline-dark); align-items: baseline;
+    }
+    .ledger-row dt {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.12em;
+      color: var(--pass-bright); display: flex; align-items: center; gap: 0.55rem;
+    }
+    .ledger-row dt::before { content: '■'; font-size: 0.5rem; }
+    .ledger-row dd { font-size: 0.98rem; color: var(--paper-soft); }
+    @media (max-width: 560px) { .ledger-row { grid-template-columns: 1fr; gap: 0.15rem; } }
+
+    /* ---------- Sections ---------- */
+    section { padding: 3.6rem 0 1rem; }
+    .sec-head { display: flex; align-items: baseline; gap: 0.9rem; margin-bottom: 0.4rem; }
+    .sec-n { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--pass); letter-spacing: 0.08em; }
+    h2 { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 1.75rem; letter-spacing: -0.015em; text-transform: uppercase; }
+    .section-note { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.09em; color: var(--ink-soft); margin-bottom: 2rem; }
+    .section-note a { color: inherit; }
+
+    /* ---------- Projects ---------- */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+    .project {
+      background: var(--card); border: 1px solid var(--hairline); border-radius: 8px;
+      padding: 1.5rem 1.6rem 1.35rem; display: flex; flex-direction: column;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+    .project:hover { transform: translateY(-3px); border-color: var(--pass); box-shadow: 0 10px 28px -14px rgba(19,29,25,0.35); }
+    @media (prefers-reduced-motion: reduce) { .project, .project:hover { transform: none; transition: none; } }
+    .project-head { display: flex; justify-content: space-between; gap: 0.8rem; align-items: baseline; flex-wrap: wrap; margin-bottom: 0.3rem; }
+    .project h3 { font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; }
+    .status { font-family: 'IBM Plex Mono', monospace; font-size: 0.64rem; letter-spacing: 0.11em; padding: 0.24rem 0.55rem; border-radius: 3px; white-space: nowrap; }
+    .status.shipped { color: var(--pass); border: 1px solid var(--pass); background: rgba(30,122,90,0.07); }
+    .status.in-build { color: var(--amber); border: 1px solid var(--amber); background: rgba(169,109,0,0.07); }
+    .tagline { font-style: italic; color: var(--ink-soft); font-size: 0.95rem; margin-bottom: 0.65rem; }
+    .project p.desc { font-size: 0.95rem; margin-bottom: 1rem; flex-grow: 1; }
+    .meta { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+    .chip { font-family: 'IBM Plex Mono', monospace; font-size: 0.64rem; letter-spacing: 0.05em; color: var(--ink-soft); background: var(--paper); border: 1px solid var(--hairline); border-radius: 3px; padding: 0.16rem 0.48rem; }
+    .chip.signal { color: var(--pass); border-color: var(--pass); }
+    .meta a { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; margin-left: auto; }
+    .meta a:hover, .meta a:focus-visible { color: var(--pass); }
+
+    /* ---------- Experience ---------- */
+    .job { border-top: 1px solid var(--hairline); padding: 1.5rem 0; position: relative; }
+    .job:first-of-type { border-top: 2px solid var(--ink); }
+    .job-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: baseline; }
+    .job h3 { font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 1.08rem; }
+    .job .period { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--pass); }
+    .job .place { font-size: 0.9rem; color: var(--ink-soft); font-style: italic; margin-bottom: 0.6rem; }
+    .job ul { padding-left: 1.1rem; }
+    .job li { font-size: 0.96rem; color: var(--ink-soft); margin-bottom: 0.3rem; }
+
+    /* ---------- Lists (pubs, certs) ---------- */
+    .rule-list { list-style: none; padding: 0; }
+    .rule-list li { border-bottom: 1px solid var(--hairline); padding: 0.7rem 0; font-size: 0.96rem; color: var(--ink-soft); }
+    .rule-list li strong { color: var(--ink); }
+    .empty { border: 1px dashed var(--hairline); border-radius: 8px; padding: 1.4rem 1.6rem; color: var(--ink-soft); font-size: 0.96rem; background: rgba(255,255,255,0.55); }
+    .empty a { color: var(--ink); }
+    .gh-card {
+      display: block; background: var(--card); border: 1px solid var(--hairline); border-radius: 8px;
+      padding: 1.5rem 1.6rem 1.2rem; text-decoration: none; transition: border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+    .gh-card:hover, .gh-card:focus-visible { border-color: var(--pass); box-shadow: 0 10px 28px -14px rgba(19,29,25,0.35); }
+    .gh-card img { width: 100%; height: auto; display: block; }
+    .gh-foot { display: block; margin-top: 0.9rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; letter-spacing: 0.05em; color: var(--pass); }
+
+    /* ---------- Contact + footer ---------- */
+    .contact-links { display: flex; gap: 1.6rem; flex-wrap: wrap; margin-top: 0.8rem; }
+    .contact-links a { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+    .contact-links a:hover, .contact-links a:focus-visible { color: var(--pass); }
+    footer { background: var(--ink); color: var(--paper-soft); margin-top: 4.5rem; padding: 1.5rem 0 2.2rem; border-top: 3px solid var(--pass); }
+    footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem; }
+    footer span { font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; letter-spacing: 0.09em; }
+
+    a:focus-visible { outline: 2px solid var(--pass); outline-offset: 2px; }
+
+    /* ---------- Reveal on scroll ---------- */
+    .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .hero > * { animation: rise 0.55s ease both; }
+      .hero > *:nth-child(2) { animation-delay: 0.07s; }
+      .hero > *:nth-child(3) { animation-delay: 0.14s; }
+      .hero > *:nth-child(4) { animation-delay: 0.21s; }
+      @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <span class="brand"><span class="dot" aria-hidden="true"></span>YOUSUF AGHA · <span class="open">OPEN TO WORK</span> · MELBOURNE</span>
+      <nav aria-label="Sections">
+        <a href="#projects">PROJECTS</a>
+        <a href="#experience">EXPERIENCE</a>
+        <a href="#publications">PUBLICATIONS</a>
+        <a href="#activity">ACTIVITY</a>
+        <a href="#contact">CONTACT</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero-band">
+    <div class="hero wrap">
+      <p class="eyebrow">SHIPPED LLM WORK, END TO END</p>
+      <h1>Yousuf<br />Agha<span class="mark">.</span></h1>
+      <p class="verdict"><strong>{profile.role}.</strong><br />{profile.verdict}</p>
+      <dl class="ledger">
+        {profile.evidence.map((e) => (
+          <div class="ledger-row">
+            <dt>{e.label}</dt>
+            <dd>{e.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </div>
+
+  <main>
+    <section id="projects" class="wrap reveal">
+      <div class="sec-head"><span class="sec-n">01 /</span><h2>Projects</h2></div>
+      <p class="section-note">STATUS LABELS ARE HONEST — NOTHING LISTED THAT CAN'T BE DEFENDED IN AN INTERVIEW</p>
+      <div class="grid">
+        {projects.map((p) => (
+          <article class="project">
+            <div class="project-head">
+              <h3>{p.name}</h3>
+              <span class={`status ${p.status}`}>{statusLabel[p.status]}</span>
+            </div>
+            <p class="tagline">{p.tagline}</p>
+            <p class="desc">{p.description}</p>
+            <div class="meta">
+              {p.signals.map((s) => <span class="chip signal">{s}</span>)}
+              {p.stack.map((t) => <span class="chip">{t}</span>)}
+              {p.repo && <a href={p.repo}>repo →</a>}
+              {p.demo && <a href={p.demo}>demo →</a>}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="experience" class="wrap reveal">
+      <div class="sec-head"><span class="sec-n">02 /</span><h2>Experience</h2></div>
+      <p class="section-note">THREE ROLES, TWO COUNTRIES, ONE THROUGH-LINE: DATA TO DECISIONS</p>
+      {profile.experience.map((j) => (
+        <article class="job">
+          <div class="job-head">
+            <h3>{j.role} · {j.org}</h3>
+            <span class="period">{j.period}</span>
+          </div>
+          <p class="place">{j.place}</p>
+          <ul>
+            {j.points.map((pt) => <li>{pt}</li>)}
+          </ul>
+        </article>
+      ))}
+    </section>
+
+    <section id="publications" class="wrap reveal">
+      <div class="sec-head"><span class="sec-n">03 /</span><h2>Publications</h2></div>
+      <p class="section-note">PEER-REVIEWED — FULL PROFILE ON <a href={profile.scholar}>GOOGLE SCHOLAR</a></p>
+      <ul class="rule-list">
+        {profile.publications.map((pub) => (
+          <li><strong>{pub.title}</strong> — {pub.authors}. <em>{pub.venue}</em>, {pub.year}.</li>
+        ))}
+      </ul>
+    </section>
+
+    <section id="certifications" class="wrap reveal">
+      <div class="sec-head"><span class="sec-n">04 /</span><h2>Certifications</h2></div>
+      <ul class="rule-list">
+        {profile.certifications.map((c) => <li>{c}</li>)}
+      </ul>
+    </section>
+
+    <section id="activity" class="wrap reveal">
+      <div class="sec-head"><span class="sec-n">05 /</span><h2>GitHub activity</h2></div>
+      <p class="section-note">LIVE CONTRIBUTION GRAPH — REGENERATED DAILY, SELF-HOSTED. 100% COMMITS, UPDATED IN <a href="https://github.com/yousufagha/daily-practice">DAILY-PRACTICE</a></p>
+      <a class="gh-card" href="https://github.com/yousufagha" aria-label="Yousuf Agha's GitHub contribution graph">
+        <img
+          src="/github-contribution.svg"
+          alt="GitHub contribution graph for yousufagha"
+          loading="lazy" />
+        <span class="gh-foot">github.com/yousufagha →</span>
+      </a>
+    </section>
+
+    <section id="contact" class="wrap reveal">
+      <div class="sec-head"><span class="sec-n">06 /</span><h2>Contact</h2></div>
+      <p>Open to AI, data science, and ML engineering roles in Melbourne and remote across Australia.</p>
+      <div class="contact-links">
+        <a href={`mailto:${profile.contact.email}`}>{profile.contact.email}</a>
+        <a href={profile.contact.github}>github.com/yousufagha</a>
+        <a href={profile.contact.linkedin}>linkedin.com/in/yousuf-agha</a>
+        <a href={profile.contact.x}>x.com/drsmartfish</a>
+        <a href={profile.scholar}>google scholar</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© {new Date().getFullYear()} YOUSUF AGHA</span>
+      <span>LAST BUILT {built.toUpperCase()} · UPDATED ALONGSIDE THE SCOREBOARD</span>
+    </div>
+  </footer>
+
+  <script is:inline>
+    (function () {
+      if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      }, { rootMargin: '0px 0px -8% 0px' });
+      document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+</body>
+</html>
