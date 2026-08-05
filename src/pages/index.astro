@@ -31,6 +31,13 @@ const mix = !mixIsComplete ? [] : [
   { label: 'CODE REVIEW', value: ghStats.breakdown.reviews },
 ].map((r) => ({ ...r, pct: Math.round((r.value / mixTotal) * 100) }));
 const built = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Australia/Melbourne' });
+
+/* Cache-bust the contribution SVG. Its filename never changes, so GitHub Pages'
+   cache headers meant returning visitors kept seeing an old copy — which quietly
+   made the "regenerated daily" claim false for anyone who'd been before. Stamped
+   with the build date rather than a random value so the URL is stable within a
+   day and still changes on every daily rebuild. */
+const assetV = new Date().toISOString().slice(0, 10);
 const statusLabel = { 'shipped': 'SHIPPED', 'in-build': 'IN BUILD', 'planned': 'PLANNED' };
 const sections = [
   { id: 'projects', n: '01' },
@@ -568,8 +575,8 @@ const sections = [
       )}
       <a class="gh-card" href="https://github.com/yousufagha" aria-label="Yousuf Agha's GitHub contribution graph">
         <img
-          src="/github-contribution.svg"
-          alt="GitHub contribution graph for yousufagha"
+          src={`/github-contribution.svg?v=${assetV}`}
+          alt={`GitHub contribution graph for yousufagha, ${new Date().getFullYear()}`}
           loading="lazy" />
         <span class="gh-foot">github.com/yousufagha →</span>
       </a>
