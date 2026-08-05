@@ -1,8 +1,26 @@
 ---
 import profile from '../data/profile.json';
 import projectData from '../data/projects.json';
+import ghStats from '../data/github-stats.json';
 
 const { projects } = projectData;
+/* The committed seed has total: 0. If the stats step didn't run — no token, API
+   blip, someone building locally — the block renders nothing rather than a row
+   of zeroes. Never show a number that isn't real. */
+const hasStats = ghStats.total > 0;
+const num = (n: number) => n.toLocaleString('en-AU');
+
+/* Contribution mix, as proportions of the four contribution types — the same
+   split GitHub shows in its activity overview. Deliberately a ratio rather than
+   a headline count: a ratio reads the same at 150 contributions as at 1,500,
+   and "75% commits" is the signal worth leading with. */
+const mixTotal = Object.values(ghStats.breakdown).reduce((a, b) => a + b, 0);
+const mix = mixTotal === 0 ? [] : [
+  { label: 'COMMITS', value: ghStats.breakdown.commits },
+  { label: 'PULL REQUESTS', value: ghStats.breakdown.pullRequests },
+  { label: 'ISSUES', value: ghStats.breakdown.issues },
+  { label: 'CODE REVIEW', value: ghStats.breakdown.reviews },
+].map((r) => ({ ...r, pct: Math.round((r.value / mixTotal) * 100) }));
 const built = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Australia/Melbourne' });
 const statusLabel = { 'shipped': 'SHIPPED', 'in-build': 'IN BUILD', 'planned': 'PLANNED' };
 const sections = [
@@ -21,6 +39,9 @@ const sections = [
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Yousuf Agha — AI engineer and data scientist, Melbourne</title>
   <meta name="description" content="AI engineer and data scientist in Melbourne. Ships LLM products end to end: fine-tuning, RAG, evals, and client-facing delivery. Full Australian work rights to 2029." />
+  <!-- Sets html.js before first paint so the reveal styles can hide content.
+       Without JS the class never lands and everything stays visible. -->
+  <script is:inline>document.documentElement.classList.add('js');</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -38,6 +59,16 @@ const sections = [
       --hairline: #DCE0DA;
       --hairline-dark: #2C3B34;
       --card: #FFFFFF;
+
+      /* Motion tokens — skill §16 "craft": three durations, defensible, used everywhere.
+         --dur-press is the pointer-down acknowledgement and must stay ~100ms;
+         past that the press stops feeling attached to the finger. */
+      --dur-press: 100ms;
+      --dur-base: 220ms;
+      --dur-reveal: 550ms;
+      /* Critically damped feel (skill §4, damping 1.0): decelerate, never overshoot.
+         Overshoot is reserved for momentum-carrying gestures, and this page has none. */
+      --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
     }
     * { box-sizing: border-box; margin: 0; }
     html { scroll-behavior: smooth; }
@@ -57,13 +88,37 @@ const sections = [
     ::selection { background: var(--pass); color: var(--paper); }
 
     /* ---------- Top bar ---------- */
+    /* Skill §12: a translucent material with content passing underneath, not an
+       opaque strip. At 0.92 alpha the old bar read as solid — the blur was doing
+       no visible work. Lower alpha lets the paper grid show through; saturate()
+       keeps colour from going flat behind the blur. */
     .topbar {
       position: sticky; top: 0; z-index: 10;
-      background: rgba(19,29,25,0.92);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--hairline-dark);
+      /* 0.86, not lower. At the top of the page the strip behind this bar is the
+         light paper background, so a thinner material composites to a mid-grey and
+         drops the small mono nav text to ~3.5:1 contrast — under the 4.5:1 AA floor.
+         At 0.86 it composites to ~#333C38 and the same text reads ~7.8:1, while the
+         blur still visibly works as content passes underneath. Legibility first;
+         translucency is only worth having where it doesn't cost the text. */
+      background: rgba(19,29,25,0.86);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      /* Bright top edge — real glass catches light along its leading edge. */
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
       padding: 0.8rem 0;
+    }
+    /* Skill §12: scroll edge effect instead of a 1px divider. Content should fade
+       where it meets floating chrome rather than being cut by a hard line. */
+    .topbar::after {
+      content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 14px;
+      background: linear-gradient(to bottom, rgba(19,29,25,0.16), rgba(19,29,25,0));
+      pointer-events: none;
+    }
+    /* Skill §12 vibrancy: text over a blurred surface needs more contrast and a
+       touch more tracking than the same text on a solid background, or it reads
+       as mud once the page scrolls underneath it. */
+    @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+      .topbar .brand, .topbar nav a { color: #DDE5E0; letter-spacing: 0.1em; }
     }
     .topbar .wrap { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
     .brand { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; color: var(--paper-soft); display: flex; align-items: center; gap: 0.6rem; }
@@ -76,14 +131,30 @@ const sections = [
     .topbar nav { display: flex; gap: 1.2rem; flex-wrap: wrap; }
     .topbar nav a {
       font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.08em;
-      color: var(--paper-soft); text-decoration: none; position: relative; padding-bottom: 2px;
+      color: var(--paper-soft); text-decoration: none; position: relative;
+      /* Skill §10: ~10px of hit padding so a slightly-off tap still lands. */
+      padding: 0.4rem 0.25rem 0.3rem;
+      transition: color var(--dur-press) var(--ease-out), transform var(--dur-press) var(--ease-out);
     }
     .topbar nav a::after {
-      content: ''; position: absolute; left: 0; bottom: 0; height: 1px; width: 100%;
-      background: var(--pass-bright); transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease;
+      content: ''; position: absolute; left: 0.25rem; right: 0.25rem; bottom: 0.25rem; height: 1px;
+      background: var(--pass-bright); transform: scaleX(0);
+      /* Skill §7: enter and exit travel the same path. transform-origin flips to
+         left only while hovered, so the rule grows rightward from the left edge
+         and withdraws back to the left rather than collapsing to the far side. */
+      transform-origin: left;
+      transition: transform var(--dur-base) var(--ease-out);
     }
-    .topbar nav a:hover, .topbar nav a:focus-visible { color: #fff; }
-    .topbar nav a:hover::after, .topbar nav a:focus-visible::after { transform: scaleX(1); }
+    .topbar nav a:focus-visible { color: #fff; }
+    .topbar nav a:focus-visible::after { transform: scaleX(1); }
+    /* Skill §10: hover effects only where a real pointer exists. On touch a
+       latched :hover survives the tap and sits there until you tap elsewhere. */
+    @media (hover: hover) {
+      .topbar nav a:hover { color: #fff; }
+      .topbar nav a:hover::after { transform: scaleX(1); }
+    }
+    /* Skill §1: acknowledge the press itself, not the navigation that follows. */
+    .topbar nav a:active { color: var(--pass-bright); transform: scale(0.94); }
 
     /* ---------- Hero: inked evaluation panel ---------- */
     .hero-band { background: var(--ink); color: var(--paper); border-bottom: 3px solid var(--pass); }
@@ -133,10 +204,35 @@ const sections = [
     .project {
       background: var(--card); border: 1px solid var(--hairline); border-radius: 8px;
       padding: 1.5rem 1.6rem 1.35rem; display: flex; flex-direction: column;
-      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      position: relative;
+      /* Skill §11: transform and opacity only. box-shadow was in this list before,
+         which forces the browser to repaint a 28px blur every frame of the hover. */
+      transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out), opacity var(--dur-reveal) var(--ease-out);
     }
-    .project:hover { transform: translateY(-3px); border-color: var(--pass); box-shadow: 0 10px 28px -14px rgba(19,29,25,0.35); }
-    @media (prefers-reduced-motion: reduce) { .project, .project:hover { transform: none; transition: none; } }
+    /* Skill §11: hint only where motion is actually imminent. Scoped to pointer
+       devices so touch users don't pay for six permanently promoted layers. */
+    @media (hover: hover) { .project, .gh-card { will-change: transform; } }
+    /* The lift shadow lives on a pseudo-element so it can cross-fade on the
+       compositor instead of being repainted (skill §11). Absolutely positioned so
+       it never becomes a flex item of the card. */
+    .project::after {
+      content: ''; position: absolute; inset: 0; border-radius: 8px;
+      box-shadow: 0 10px 28px -14px rgba(19,29,25,0.35);
+      opacity: 0; transition: opacity var(--dur-base) var(--ease-out);
+      pointer-events: none;
+    }
+    @media (hover: hover) {
+      .project:hover { transform: translateY(-3px); border-color: var(--pass); }
+      .project:hover::after { opacity: 1; }
+    }
+    /* Skill §1: the card is the primary interactive object on the page — it has to
+       answer the finger. Slightly under the 0.97 default because the card is large;
+       the same scale reads as more movement on a bigger surface. */
+    .project:active { transform: scale(0.985); border-color: var(--pass); }
+    @media (prefers-reduced-motion: reduce) {
+      .project, .project:hover, .project:active { transform: none; transition: none; }
+      .project::after { transition: none; }
+    }
     .project-head { display: flex; justify-content: space-between; gap: 0.8rem; align-items: baseline; flex-wrap: wrap; margin-bottom: 0.3rem; }
     .project h3 { font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; }
     .status { font-family: 'IBM Plex Mono', monospace; font-size: 0.64rem; letter-spacing: 0.11em; padding: 0.24rem 0.55rem; border-radius: 3px; white-space: nowrap; }
@@ -147,8 +243,15 @@ const sections = [
     .meta { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
     .chip { font-family: 'IBM Plex Mono', monospace; font-size: 0.64rem; letter-spacing: 0.05em; color: var(--ink-soft); background: var(--paper); border: 1px solid var(--hairline); border-radius: 3px; padding: 0.16rem 0.48rem; }
     .chip.signal { color: var(--pass); border-color: var(--pass); }
-    .meta a { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; margin-left: auto; }
-    .meta a:hover, .meta a:focus-visible { color: var(--pass); }
+    .meta a {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--ink);
+      text-decoration: underline; text-underline-offset: 3px; margin-left: auto;
+      padding: 0.3rem 0.2rem; display: inline-block; /* skill §10: hit padding */
+      transition: color var(--dur-press) var(--ease-out), transform var(--dur-press) var(--ease-out);
+    }
+    .meta a:focus-visible { color: var(--pass); }
+    @media (hover: hover) { .meta a:hover { color: var(--pass); } }
+    .meta a:active { color: var(--pass); transform: scale(0.94); }
 
     /* ---------- Experience ---------- */
     .job { border-top: 1px solid var(--hairline); padding: 1.5rem 0; position: relative; }
@@ -168,26 +271,155 @@ const sections = [
     .empty a { color: var(--ink); }
     .gh-card {
       display: block; background: var(--card); border: 1px solid var(--hairline); border-radius: 8px;
-      padding: 1.5rem 1.6rem 1.2rem; text-decoration: none; transition: border-color 0.22s ease, box-shadow 0.22s ease;
+      padding: 1.5rem 1.6rem 1.2rem; text-decoration: none; position: relative;
+      transition: border-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
     }
-    .gh-card:hover, .gh-card:focus-visible { border-color: var(--pass); box-shadow: 0 10px 28px -14px rgba(19,29,25,0.35); }
+    /* Same compositor treatment as .project (skill §11) — shadow cross-fades on a
+       pseudo-element rather than repainting a blur on every frame. */
+    .gh-card::after {
+      content: ''; position: absolute; inset: 0; border-radius: 8px;
+      box-shadow: 0 10px 28px -14px rgba(19,29,25,0.35);
+      opacity: 0; transition: opacity var(--dur-base) var(--ease-out);
+      pointer-events: none;
+    }
+    .gh-card:focus-visible { border-color: var(--pass); }
+    .gh-card:focus-visible::after { opacity: 1; }
+    @media (hover: hover) {
+      .gh-card:hover { border-color: var(--pass); }
+      .gh-card:hover::after { opacity: 1; }
+    }
+    .gh-card:active { border-color: var(--pass); transform: scale(0.99); }
+    @media (prefers-reduced-motion: reduce) {
+      .gh-card, .gh-card:active { transform: none; transition: none; }
+      .gh-card::after { transition: none; }
+    }
     .gh-card img { width: 100%; height: auto; display: block; }
     .gh-foot { display: block; margin-top: 0.9rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; letter-spacing: 0.05em; color: var(--pass); }
 
+    /* ---------- GitHub stats ---------- */
+    .stats { margin-bottom: 1.8rem; }
+    /* Skill §15: small mono caps take positive tracking. Same treatment as the
+       other labels on the page, so this reads as part of the system. */
+    .stat-l { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.11em; color: var(--ink-soft); }
+
+    .mix { margin-top: 0.9rem; }
+    .mix-row { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.9rem; align-items: center; padding: 0.32rem 0; }
+    .mix-row dt {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; letter-spacing: 0.09em;
+      color: var(--ink-soft);
+    }
+    .mix-row dd { display: flex; align-items: center; gap: 0.7rem; margin: 0; }
+    .mix-bar {
+      flex: 1; height: 6px; border-radius: 3px;
+      background: var(--hairline); position: relative; overflow: hidden;
+    }
+    /* The fill is a transform-scaled pseudo-element rather than an animated
+       width, so if this is ever animated it stays on the compositor (skill §11). */
+    .mix-bar::before {
+      content: ''; position: absolute; inset: 0;
+      background: var(--pass); border-radius: 3px;
+      transform-origin: left; transform: scaleX(var(--pct));
+    }
+    .mix-pct {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--ink);
+      min-width: 2.6rem; text-align: right; font-variant-numeric: tabular-nums;
+    }
+    @media (max-width: 460px) {
+      .mix-row { grid-template-columns: 1fr; gap: 0.25rem; }
+    }
+
+    .stat-more {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; letter-spacing: 0.09em;
+      color: var(--ink-soft); margin-top: 0.7rem;
+    }
+
+    .top-repos { list-style: none; padding: 0; margin-top: 1.2rem; border-top: 1px solid var(--hairline); }
+    .top-repos li {
+      display: flex; align-items: baseline; gap: 0.8rem;
+      padding: 0.6rem 0; border-bottom: 1px solid var(--hairline);
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem;
+    }
+    .top-repos .rank { color: var(--pass); letter-spacing: 0.08em; }
+    .top-repos a {
+      color: var(--ink); text-decoration: underline; text-underline-offset: 3px;
+      padding: 0.2rem 0.15rem; /* skill §10: hit padding */
+      transition: color var(--dur-press) var(--ease-out), transform var(--dur-press) var(--ease-out);
+    }
+    .top-repos a:focus-visible { color: var(--pass); }
+    @media (hover: hover) { .top-repos a:hover { color: var(--pass); } }
+    .top-repos a:active { color: var(--pass); transform: scale(0.96); }
+    .top-repos .repo-commits { margin-left: auto; color: var(--ink-soft); letter-spacing: 0.05em; white-space: nowrap; }
+    @media (max-width: 460px) {
+      .top-repos li { flex-wrap: wrap; gap: 0.4rem; }
+      .top-repos .repo-commits { margin-left: 0; width: 100%; }
+    }
+
     /* ---------- Contact + footer ---------- */
     .contact-links { display: flex; gap: 1.6rem; flex-wrap: wrap; margin-top: 0.8rem; }
-    .contact-links a { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-    .contact-links a:hover, .contact-links a:focus-visible { color: var(--pass); }
+    .contact-links a {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: var(--ink);
+      text-decoration: underline; text-underline-offset: 3px;
+      padding: 0.3rem 0.2rem; display: inline-block; /* skill §10: hit padding */
+      transition: color var(--dur-press) var(--ease-out), transform var(--dur-press) var(--ease-out);
+    }
+    .contact-links a:focus-visible { color: var(--pass); }
+    @media (hover: hover) { .contact-links a:hover { color: var(--pass); } }
+    .contact-links a:active { color: var(--pass); transform: scale(0.95); }
     footer { background: var(--ink); color: var(--paper-soft); margin-top: 4.5rem; padding: 1.5rem 0 2.2rem; border-top: 3px solid var(--pass); }
     footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem; }
     footer span { font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; letter-spacing: 0.09em; }
 
     a:focus-visible { outline: 2px solid var(--pass); outline-offset: 2px; }
 
-    /* ---------- Reveal on scroll ---------- */
-    .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.55s ease, transform 0.55s ease; }
-    .reveal.in { opacity: 1; transform: none; }
-    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+    /* ---------- Skill §14: the other two accessibility signals ----------
+       prefers-reduced-motion was already handled. These two were not, and the
+       transparency one is now load-bearing since the topbar became genuinely
+       see-through. Reduced transparency means frostier/solid, not "no chrome". */
+    @media (prefers-reduced-transparency: reduce) {
+      .topbar {
+        background: var(--ink);
+        backdrop-filter: none; -webkit-backdrop-filter: none;
+        border-bottom: 1px solid var(--hairline-dark);
+      }
+      .topbar::after { display: none; }
+      .empty { background: var(--card); }
+    }
+
+    /* Skill §14: near-solid backgrounds with defined, contrasting borders. */
+    @media (prefers-contrast: more) {
+      .topbar {
+        background: #000;
+        backdrop-filter: none; -webkit-backdrop-filter: none;
+        border-bottom: 1px solid var(--paper-soft);
+      }
+      .topbar::after { display: none; }
+      .topbar .brand, .topbar nav a { color: #fff; }
+      .project, .gh-card { border-color: var(--ink); }
+      .chip { border-color: var(--ink-soft); color: var(--ink); }
+      .tagline, .job li, .rule-list li, .section-note { color: var(--ink); }
+      a:focus-visible { outline-width: 3px; }
+    }
+
+    /* ---------- Reveal on scroll ----------
+       The hidden state is gated behind html.js, which is set by a one-line script
+       in <head>. Previously .reveal defaulted to opacity:0 unconditionally, so if
+       the inline reveal script threw for any reason other than a missing
+       IntersectionObserver, every section on the page stayed invisible. Content
+       must never depend on JS succeeding. */
+    html.js .reveal { opacity: 0; transform: translateY(14px); transition: opacity var(--dur-reveal) var(--ease-out), transform var(--dur-reveal) var(--ease-out); }
+    html.js .reveal.in { opacity: 1; transform: none; }
+
+    /* Skill §16.7: cards arrive in sequence rather than as one slab. The stagger is
+       applied in JS rather than via transition-delay, because a CSS delay would
+       persist after the reveal and lag every subsequent hover by the same amount. */
+    html.js .reveal .project { opacity: 0; transform: translateY(10px); }
+    html.js .reveal .project.shown { opacity: 1; transform: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html.js .reveal, html.js .reveal .project {
+        opacity: 1; transform: none; transition: none;
+      }
+    }
 
     @media (prefers-reduced-motion: no-preference) {
       .hero > * { animation: rise 0.55s ease both; }
@@ -288,7 +520,39 @@ const sections = [
 
     <section id="activity" class="wrap reveal">
       <div class="sec-head"><span class="sec-n">05 /</span><h2>GitHub activity</h2></div>
-      <p class="section-note">LIVE CONTRIBUTION GRAPH — REGENERATED DAILY, SELF-HOSTED. 100% COMMITS, UPDATED IN <a href="https://github.com/yousufagha/daily-practice">DAILY-PRACTICE</a></p>
+      <p class="section-note">LIVE CONTRIBUTION GRAPH — REGENERATED DAILY, SELF-HOSTED. FIGURES ARE PUBLIC AND VERIFIABLE ON GITHUB</p>
+
+      {hasStats && (
+        <div class="stats">
+          <p class="stat-l">CONTRIBUTION MIX · {num(ghStats.total)} CONTRIBUTIONS IN {ghStats.year}</p>
+          <dl class="mix">
+            {mix.map((r) => (
+              <div class="mix-row">
+                <dt>{r.label}</dt>
+                <dd>
+                  {/* Unitless fraction, not a percentage — scaleX() takes a number. */}
+                  <span class="mix-bar" style={`--pct:${r.pct / 100}`} aria-hidden="true"></span>
+                  <span class="mix-pct">{r.pct}%</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+          {ghStats.topRepos.length > 0 && (
+            <ol class="top-repos">
+              {ghStats.topRepos.map((r, i) => (
+                <li>
+                  <span class="rank">{String(i + 1).padStart(2, '0')}</span>
+                  <a href={r.url}>{r.name}</a>
+                  <span class="repo-commits">{num(r.commits)} commits</span>
+                </li>
+              ))}
+            </ol>
+          )}
+          {ghStats.repoCount > 3 && (
+            <p class="stat-more">AND {num(ghStats.repoCount - 3)} OTHER PUBLIC REPOSITORIES</p>
+          )}
+        </div>
+      )}
       <a class="gh-card" href="https://github.com/yousufagha" aria-label="Yousuf Agha's GitHub contribution graph">
         <img
           src="/github-contribution.svg"
@@ -320,16 +584,37 @@ const sections = [
 
   <script is:inline>
     (function () {
-      if (!('IntersectionObserver' in window)) {
+      var STAGGER_MS = 40; /* skill §16.6: restraint. Perceptible, never a queue. */
+
+      function showAll() {
         document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
-        return;
+        document.querySelectorAll('.project').forEach(function (el) { el.classList.add('shown'); });
       }
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+
+      /* Reduced motion still reveals — it just arrives without the travel
+         (skill §14: a gentler equivalent, not the absence of feedback). */
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced || !('IntersectionObserver' in window)) { showAll(); return; }
+
+      function reveal(section) {
+        section.classList.add('in');
+        var cards = section.querySelectorAll('.project');
+        cards.forEach(function (card, i) {
+          setTimeout(function () { card.classList.add('shown'); }, i * STAGGER_MS);
         });
-      }, { rootMargin: '0px 0px -8% 0px' });
-      document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+      }
+
+      try {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { reveal(e.target); io.unobserve(e.target); }
+          });
+        }, { rootMargin: '0px 0px -8% 0px' });
+        document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+      } catch (err) {
+        /* Never leave the page hidden because of a scroll effect. */
+        showAll();
+      }
     })();
   </script>
 </body>

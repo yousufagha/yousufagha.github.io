@@ -3,6 +3,11 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Daily rebuild. This is what actually makes "REGENERATED DAILY" true — the old
+  # setup committed a fresh SVG each day, but commits made with GITHUB_TOKEN can't
+  # trigger other workflows, so no deploy ever ran and the live graph went stale.
+  schedule:
+    - cron: '17 15 * * *'   # ~01:17 Melbourne
   workflow_dispatch:
 
 permissions:
@@ -15,11 +20,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Both artefacts are generated into the working tree and consumed by the
+      # build. Nothing is committed back, so there are no bot commits in history
+      # and no recursive-trigger problem.
+      - name: Render contribution SVG
+        continue-on-error: true
+        run: python scripts/gen_contrib_svg.py yousufagha public/github-contribution.svg
+
+      - name: Fetch contribution stats
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/gen_github_stats.py yousufagha src/data/github-stats.json
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm install
       - run: npm run build
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
