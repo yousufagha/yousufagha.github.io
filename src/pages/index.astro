@@ -15,7 +15,16 @@ const num = (n: number) => n.toLocaleString('en-AU');
    a headline count: a ratio reads the same at 150 contributions as at 1,500,
    and "75% commits" is the signal worth leading with. */
 const mixTotal = Object.values(ghStats.breakdown).reduce((a, b) => a + b, 0);
-const mix = mixTotal === 0 ? [] : [
+
+/* A repo-scoped GITHUB_TOKEN returns the contribution calendar but zeroes for
+   issue/PR/review contributions across a user's account, which renders as a
+   meaningless 100/0/0/0 chart. If all three non-commit types are zero, treat the
+   breakdown as unavailable and show nothing rather than something wrong. */
+const mixIsComplete = mixTotal > 0 && (
+  ghStats.breakdown.pullRequests + ghStats.breakdown.issues + ghStats.breakdown.reviews
+) > 0;
+
+const mix = !mixIsComplete ? [] : [
   { label: 'COMMITS', value: ghStats.breakdown.commits },
   { label: 'PULL REQUESTS', value: ghStats.breakdown.pullRequests },
   { label: 'ISSUES', value: ghStats.breakdown.issues },
@@ -524,19 +533,23 @@ const sections = [
 
       {hasStats && (
         <div class="stats">
-          <p class="stat-l">CONTRIBUTION MIX · {num(ghStats.total)} CONTRIBUTIONS IN {ghStats.year}</p>
-          <dl class="mix">
-            {mix.map((r) => (
-              <div class="mix-row">
-                <dt>{r.label}</dt>
-                <dd>
-                  {/* Unitless fraction, not a percentage — scaleX() takes a number. */}
-                  <span class="mix-bar" style={`--pct:${r.pct / 100}`} aria-hidden="true"></span>
-                  <span class="mix-pct">{r.pct}%</span>
-                </dd>
-              </div>
-            ))}
-          </dl>
+          <p class="stat-l">
+            {mix.length > 0 ? 'CONTRIBUTION MIX · ' : ''}{num(ghStats.total)} CONTRIBUTIONS IN {ghStats.year}
+          </p>
+          {mix.length > 0 && (
+            <dl class="mix">
+              {mix.map((r) => (
+                <div class="mix-row">
+                  <dt>{r.label}</dt>
+                  <dd>
+                    {/* Unitless fraction, not a percentage — scaleX() takes a number. */}
+                    <span class="mix-bar" style={`--pct:${r.pct / 100}`} aria-hidden="true"></span>
+                    <span class="mix-pct">{r.pct}%</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
           {ghStats.topRepos.length > 0 && (
             <ol class="top-repos">
               {ghStats.topRepos.map((r, i) => (

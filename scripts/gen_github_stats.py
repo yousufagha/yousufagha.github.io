@@ -109,11 +109,21 @@ if __name__ == "__main__":
     user = sys.argv[1] if len(sys.argv) > 1 else "yousufagha"
     out = sys.argv[2] if len(sys.argv) > 2 else "src/data/github-stats.json"
 
-    token = os.environ.get("GITHUB_TOKEN")
+    # STATS_TOKEN first. The default Actions GITHUB_TOKEN is a repo-scoped
+    # installation token: it returns the contribution calendar, but zeroes for
+    # issue/PR/review contributions across the whole account. A classic PAT with
+    # read:user returns the real breakdown.
+    token = os.environ.get("STATS_TOKEN") or os.environ.get("GITHUB_TOKEN")
     if not token:
-        raise SystemExit("GITHUB_TOKEN not set — the GraphQL API rejects anonymous requests.")
+        raise SystemExit("No token set — the GraphQL API rejects anonymous requests.")
 
     data = shape(*fetch(user, token))
+
+    b = data["breakdown"]
+    if b["pullRequests"] + b["issues"] + b["reviews"] == 0 and b["commits"] > 0:
+        print("WARNING: only commit contributions came back. This is what a "
+              "repo-scoped GITHUB_TOKEN returns — set a STATS_TOKEN secret "
+              "(classic PAT, read:user) to get the real breakdown.")
 
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w") as f:

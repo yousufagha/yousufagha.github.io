@@ -35,6 +35,10 @@ jobs:
       - name: Fetch contribution stats
         continue-on-error: true
         env:
+          # STATS_TOKEN is a classic PAT with read:user. Without it the script
+          # falls back to GITHUB_TOKEN, which only returns commit contributions —
+          # the site then hides the mix chart rather than showing a false split.
+          STATS_TOKEN: ${{ secrets.STATS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/gen_github_stats.py yousufagha src/data/github-stats.json
 
