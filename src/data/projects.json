@@ -2,11 +2,32 @@
   "note": "Single source of truth for the projects section. Update this file alongside the weekly scoreboard; the site rebuilds on push. Statuses: shipped | in-build | planned. Signals must be true before they are listed.",
   "projects": [
     {
+      "name": "Dubai Real Estate and Golden Visa Analysis",
+      "slug": "dubai-real-estate",
+      "status": "shipped",
+      "tagline": "1.8 million Dubai sales and 10.7 million rent contract lines, analysed around the AED 2 million Golden Visa line",
+      "description": "Compiled and published Dubai Land Department open data (via Data.Dubai) as free downloads with a price index, then analysed demand around the AED 2 million Golden Visa threshold: estimated rental yields of 5.2 to 6.4 percent, and a rent-first ranking of homes backtested across four rounds from 2022 to 2025.",
+      "stack": [
+        "Python",
+        "pandas",
+        "Tableau",
+        "GitHub Actions"
+      ],
+      "signals": [],
+      "repo": "https://github.com/yousufagha/ai-recommendations-portfolio",
+      "demo": "https://yousufagha.github.io/ai-recommendations-portfolio/",
+      "record": {
+        "figure": "1.8M",
+        "data": "Dubai transactions",
+        "method": "Yield analysis, backtesting"
+      }
+    },
+    {
       "name": "Job Market Insights Dashboard",
       "slug": "job-market-insights",
       "status": "shipped",
       "tagline": "9,000+ AU entry-level IT job ads, scraped and analysed",
-      "description": "Scraped and structured over nine thousand Australian entry-level IT job advertisements, then built dashboards cutting the market by role, city, and skill demand.",
+      "description": "Led a team project: I scraped all 9,000 plus Australian entry-level IT job ads, wrote most of the code, and built dashboards cutting the market by role, city and skill demand.",
       "stack": [
         "Python",
         "Web scraping",

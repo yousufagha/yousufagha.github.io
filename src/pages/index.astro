@@ -82,15 +82,17 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{`${profile.name}, AI engineer and data scientist`}</title>
-  <meta name="description" content={`${profile.name}, AI engineer and data scientist in Dubai. Ships LLM products end to end: fine-tuning, RAG, evals and client delivery.`} />
+  <meta name="description" content={`${profile.name}, AI engineer and data scientist in the UAE (Golden Visa). Builds with LLMs and data: fine-tuning, evaluation pipelines, data pipelines and published research.`} />
   <meta name="theme-color" content="#09090B" />
   <link rel="alternate" type="text/plain" href="/llms.txt" title="Profile for AI assistants" />
   <link rel="canonical" href="https://yousufagha.github.io/" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <script type="application/ld+json" set:html={'{"@context": "https://schema.org", "@type": "Person", "name": "Yousuf Agha", "url": "https://yousufagha.github.io/", "image": "https://yousufagha.github.io/avatar.jpg", "jobTitle": "AI engineer and data scientist", "address": {"@type": "PostalAddress", "addressCountry": "AE"}, "alumniOf": [{"@type": "CollegeOrUniversity", "name": "Torrens University Australia"}, {"@type": "CollegeOrUniversity", "name": "Skyline University College"}], "knowsAbout": ["Large language models", "Generative AI", "Data science", "Machine learning", "NLP", "Python"], "sameAs": ["https://www.linkedin.com/in/yousuf-agha/", "https://github.com/yousufagha", "https://x.com/drsmartfish", "https://scholar.google.com/citations?user=RZ_ToiwAAAAJ"]}'} />
   <meta property="og:type" content="profile" />
   <meta property="og:url" content="https://yousufagha.github.io/" />
   <meta property="og:title" content={`${profile.name}, AI engineer and data scientist`} />
-  <meta property="og:description" content="Based in Dubai. Shipped LLM proofs of concept at Raen AI, published research on generative AI, open to roles in the UAE and remote." />
+  <meta property="og:description" content="AI engineer and data scientist in the UAE, on a Golden Visa. Builds with LLMs and data, publishes research on generative AI, open to roles in the UAE and remote." />
   <meta property="og:image" content="https://yousufagha.github.io/og.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -125,6 +127,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
       --dxb: #FF8A5B;
       --mel: #7CB8FF;
       --c-jobs: #34D399;
+      --c-dubai: #FFB366;
       --c-beats: #FF5A6E;
       --c-runway: #E879F9;
       --g0: #1A1A1F; --g1: #173A2D; --g2: #1E6B4E; --g3: #2DA875; --g4: #5EE0A7;
@@ -146,6 +149,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
       --dxb: #E0622F;
       --mel: #2F6FD6;
       --c-jobs: #059669;
+      --c-dubai: #C2620C;
       --c-beats: #E11D48;
       --c-runway: #C026D3;
       --g0: #ECECEF; --g1: #BBF7D0; --g2: #4ADE80; --g3: #16A34A; --g4: #14532D;
@@ -193,7 +197,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     .banner .tag { font-family: var(--mono); fill: rgba(255, 246, 236, 0.7); letter-spacing: 0.08em; }
     .route { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem 1.25rem; margin-top: 0.7rem; }
     .route div { display: grid; gap: 0.2rem; align-content: start; }
-    .route h3 { font: 500 0.6875rem/1.2 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; display: flex; align-items: center; gap: 0.4rem; }
+    .route h3 { font: 500 0.75rem/1.2 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; display: flex; align-items: center; gap: 0.4rem; }
     .route h3::before { content: ""; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; }
     .route .dxb h3 { color: var(--dxb); } .route .mel h3 { color: var(--mel); text-align: right; justify-content: flex-end; }
     .route .mel { text-align: right; }
@@ -229,10 +233,10 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     .ilink { color: var(--ink); border-bottom: 1px solid var(--line-2); transition: border-color 150ms var(--ease); }
     .ilink:hover { border-color: var(--ink); }
     .snapshot { margin-top: 1.5rem; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 1rem 1.1rem; }
-    .snapshot h3 { font: 500 0.6875rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; }
+    .snapshot h3 { font: 500 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; }
     .snapshot dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem 1.5rem; }
     .snapshot div { display: grid; gap: 0.1rem; }
-    .snapshot dt { font: 400 0.6875rem/1.3 var(--mono); color: var(--muted); }
+    .snapshot dt { font: 400 0.75rem/1.3 var(--mono); color: var(--muted); }
     .snapshot dd { color: var(--ink); font-size: 0.875rem; }
     @media (max-width: 34rem) { .snapshot dl { grid-template-columns: minmax(0, 1fr); } }
 
@@ -263,7 +267,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     .card--wide { grid-column: 1 / -1; }
     .preview { position: relative; border: 1px solid var(--line); border-radius: 10px; min-height: 11.5rem; padding: 2.4rem 0.9rem 0.9rem; background: var(--bg) repeating-linear-gradient(-45deg, var(--hatch) 0 1px, transparent 1px 9px); overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
     .badges { position: absolute; top: 0.6rem; left: 0.6rem; right: 0.6rem; display: flex; justify-content: space-between; gap: 0.5rem; }
-    .badge { display: inline-flex; align-items: center; gap: 0.35rem; height: 1.35rem; padding: 0 0.45rem; border-radius: 5px; font: 500 0.625rem/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid; }
+    .badge { display: inline-flex; align-items: center; gap: 0.35rem; height: 1.35rem; padding: 0 0.45rem; border-radius: 5px; font: 500 0.75rem/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid; }
     .badge--live { color: var(--live); background: var(--live-soft); border-color: color-mix(in oklab, var(--live) 35%, transparent); }
     .badge--live::before { content: ""; width: 0.35rem; height: 0.35rem; border-radius: 50%; background: currentColor; }
     .badge--wip { color: var(--warm); background: var(--warm-soft); border-color: color-mix(in oklab, var(--warm) 35%, transparent); }
@@ -279,15 +283,24 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     .eng p { margin-top: 0.4rem; font-size: 0.8125rem; }
     .card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 0.75rem; margin-top: auto; padding-top: 0.75rem; border-top: 1px solid var(--line); }
     .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-    .chip { font: 400 0.6875rem/1 var(--mono); color: var(--ink-2); border: 1px solid var(--line-2); border-radius: 5px; padding: 0.3rem 0.45rem; background: var(--bg); }
+    .chip { font: 400 0.75rem/1 var(--mono); color: var(--ink-2); border: 1px solid var(--line-2); border-radius: 5px; padding: 0.3rem 0.45rem; background: var(--bg); }
     .card-foot .icon-btn { width: 1.9rem; height: 1.9rem; flex: none; }
 
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+    .stats div { border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface); padding: 0.8rem 0.9rem; display: grid; gap: 0.25rem; }
+    .stats b { font: 400 clamp(1.5rem, 4vw, 2.1rem)/1 var(--serif); color: var(--ink); }
+    .stats span { font: 400 0.75rem/1.35 var(--mono); color: var(--muted); }
+    .yield { margin-top: 0.8rem; display: grid; gap: 0.35rem; font: 400 0.75rem/1.3 var(--mono); color: var(--muted); }
+    .yield .bar { position: relative; height: 0.6rem; border-radius: 99px; background: var(--line); }
+    .yield .bar i { position: absolute; top: 0; bottom: 0; left: var(--a); right: var(--b); border-radius: 99px; background: var(--c-dubai); }
+    .yield .ends { display: flex; justify-content: space-between; }
+    @media (max-width: 34rem) { .stats { grid-template-columns: minmax(0, 1fr); } }
     .seg { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.7rem; }
-    .seg button { font: 400 0.6875rem/1 var(--mono); color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 0.35rem 0.5rem; cursor: pointer; transition: color 150ms var(--ease), border-color 150ms var(--ease), transform 100ms var(--ease); }
+    .seg button { font: 400 0.75rem/1 var(--mono); color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 0.35rem 0.5rem; cursor: pointer; transition: color 150ms var(--ease), border-color 150ms var(--ease), transform 100ms var(--ease); }
     .seg button:hover { color: var(--ink); }
     .seg button:active { transform: scale(0.95); }
     .seg button[aria-pressed="true"] { color: var(--ink); border-color: var(--muted); }
-    .ex-read { font: 400 0.6875rem/1.3 var(--mono); color: var(--muted); margin-bottom: 0.5rem; }
+    .ex-read { font: 400 0.75rem/1.3 var(--mono); color: var(--muted); margin-bottom: 0.5rem; }
     .ex-read b { color: var(--ink); font-weight: 500; }
     .bars { list-style: none; padding: 0; display: grid; gap: 0.32rem; }
     .bars li { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr) 2.4rem; align-items: center; gap: 0.6rem; font: 400 0.75rem/1.2 var(--mono); }
@@ -295,25 +308,25 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     .bars .track { height: 0.45rem; border-radius: 99px; background: var(--line); overflow: hidden; }
     .bars .fill { display: block; height: 100%; border-radius: 99px; background: var(--c-jobs); transform-origin: left; transform: scaleX(var(--v, 0)); transition: transform 520ms var(--ease); transition-delay: calc(var(--i, 0) * 30ms); }
     .bars .n { text-align: right; color: var(--muted); }
-    .ex-note { margin-top: 0.6rem; font: 400 0.625rem/1.45 var(--mono); color: var(--muted); }
+    .ex-note { margin-top: 0.6rem; font: 400 0.75rem/1.45 var(--mono); color: var(--muted); }
 
     .dotplot { list-style: none; padding: 0; display: grid; gap: 0.2rem; }
-    .dotplot li { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) 2rem; align-items: center; gap: 0.5rem; font: 400 0.6875rem/1.2 var(--mono); }
+    .dotplot li { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) 2rem; align-items: center; gap: 0.5rem; font: 400 0.75rem/1.2 var(--mono); }
     .dotplot .k { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .dotplot .axis { position: relative; height: 0.85rem; background: linear-gradient(var(--line-2), var(--line-2)) center / 100% 1px no-repeat; }
     .dotplot .pt { position: absolute; top: 50%; left: var(--x); width: 0.5rem; height: 0.5rem; margin: -0.25rem 0 0 -0.25rem; border-radius: 50%; background: var(--ink); }
     .dotplot .pt { background: color-mix(in oklab, var(--c-beats) 55%, var(--ink)); }
     .dotplot li:first-child .pt { background: var(--c-beats); }
     .dotplot .n { text-align: right; color: var(--ink); }
-    .scale { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) 2rem; gap: 0.5rem; font: 400 0.625rem/1 var(--mono); color: var(--muted); margin-top: 0.35rem; }
+    .scale { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) 2rem; gap: 0.5rem; font: 400 0.75rem/1 var(--mono); color: var(--muted); margin-top: 0.35rem; }
     .scale span:nth-child(2) { display: flex; justify-content: space-between; }
 
     .flow { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
     .flow--row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .flow li { border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); padding: 0.5rem 0.6rem; display: grid; gap: 0.15rem; }
-    .flow .s { font: 400 0.625rem/1 var(--mono); color: var(--muted); }
+    .flow .s { font: 400 0.75rem/1 var(--mono); color: var(--muted); }
     .flow strong { font: 500 0.8125rem/1.2 var(--sans); color: var(--ink); }
-    .flow span:last-child { font: 400 0.6875rem/1.35 var(--mono); color: var(--muted); }
+    .flow span:last-child { font: 400 0.75rem/1.35 var(--mono); color: var(--muted); }
     .flow li.out { border-color: color-mix(in oklab, var(--c-runway) 50%, var(--line-2)); background: color-mix(in oklab, var(--c-runway) 12%, transparent); }
     @media (max-width: 34rem) { .flow--row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
@@ -325,7 +338,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     .mark { width: 2.6rem; height: 2.6rem; border-radius: 10px; display: grid; place-items: center; font: 400 1.2rem/1 var(--serif); color: var(--city); background: color-mix(in oklab, var(--city) 13%, var(--surface)); border: 1px solid color-mix(in oklab, var(--city) 40%, var(--line-2)); }
     .job.dxb { --city: var(--dxb); } .job.mel { --city: var(--mel); }
     .when-wrap { display: grid; justify-items: end; gap: 0.3rem; }
-    .dur { font: 500 0.6875rem/1 var(--mono); color: var(--city); background: color-mix(in oklab, var(--city) 12%, transparent); border: 1px solid color-mix(in oklab, var(--city) 35%, transparent); border-radius: 999px; padding: 0.25rem 0.5rem; white-space: nowrap; }
+    .dur { font: 500 0.75rem/1 var(--mono); color: var(--city); background: color-mix(in oklab, var(--city) 12%, transparent); border: 1px solid color-mix(in oklab, var(--city) 35%, transparent); border-radius: 999px; padding: 0.25rem 0.5rem; white-space: nowrap; }
     .job .city-name { color: var(--city); }
     .job-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
     .job h3 { font: 500 0.9375rem/1.35 var(--sans); color: var(--ink); }
@@ -339,7 +352,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     .now { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
     .now li { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 0.9rem 1rem; display: grid; gap: 0.35rem; align-content: start; position: relative; overflow: hidden; }
     .now li::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 2px; background: var(--k); }
-    .now .k { font: 500 0.6875rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--k); }
+    .now .k { font: 500 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--k); }
     .now .v { font-size: 0.875rem; color: var(--ink); }
     @media (max-width: 40rem) { .now { grid-template-columns: minmax(0, 1fr); } }
 
@@ -347,11 +360,11 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     .papers { list-style: none; padding: 0; display: grid; gap: 0.6rem; }
     .paper { display: block; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 0.9rem 1rem; transition: border-color 200ms var(--ease); }
     a.paper:hover { border-color: var(--line-2); }
-    .paper-top { display: flex; justify-content: space-between; gap: 1rem; font: 400 0.6875rem/1.3 var(--mono); color: var(--muted); }
+    .paper-top { display: flex; justify-content: space-between; gap: 1rem; font: 400 0.75rem/1.3 var(--mono); color: var(--muted); }
     .paper h3 { margin-top: 0.4rem; font: 500 0.9375rem/1.4 var(--sans); color: var(--ink); }
     .paper p { margin-top: 0.3rem; font-size: 0.8125rem; }
     .certs { margin-top: 1.4rem; }
-    .certs h3 { font: 500 0.6875rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; }
+    .certs h3 { font: 500 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; }
     .certs ul { list-style: none; padding: 0; }
     .certs li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.55rem 0; border-bottom: 1px dashed var(--line-2); font-size: 0.875rem; }
     .certs li:last-child { border-bottom: 0; }
@@ -372,12 +385,12 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     .cta h2 { font: 400 clamp(2rem, 6vw, 2.75rem)/1.05 var(--serif); color: var(--ink); }
     .cta p { margin: 0.7rem auto 1.4rem; max-width: 44ch; }
     .cta .links { justify-content: center; }
-    footer .inner { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-block: 1.1rem 1.6rem; font: 400 0.6875rem/1.4 var(--mono); color: var(--muted); }
+    footer .inner { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-block: 1.1rem 1.6rem; font: 400 0.75rem/1.4 var(--mono); color: var(--muted); }
 
     /* ---------- Sticky index ---------- */
     .index { position: fixed; top: 7.5rem; left: calc(50% + var(--col) / 2 + 2.5rem); display: none; z-index: 5; }
     @media (min-width: 76rem) { .index { display: block; } }
-    .index h2 { font: 500 0.625rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.9rem; }
+    .index h2 { font: 500 0.75rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.9rem; }
     .index ol { list-style: none; padding: 0; display: grid; gap: 0.15rem; }
     .index a { display: flex; align-items: center; gap: 0.55rem; font: 400 0.75rem/1 var(--mono); color: var(--muted); padding: 0.4rem 0; transition: color 200ms var(--ease); }
     .index a::before { content: ""; width: 0; height: 1px; background: var(--ink); transition: width 250ms var(--ease); }
@@ -395,7 +408,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     .pal ul { list-style: none; padding: 0.4rem; margin: 0; max-height: 21rem; overflow-y: auto; }
     .pal li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0.75rem; border-radius: 8px; cursor: pointer; font-size: 0.875rem; }
     .pal li[hidden] { display: none; }
-    .pal li .g { font: 400 0.6875rem/1.6 var(--mono); color: var(--muted); }
+    .pal li .g { font: 400 0.75rem/1.6 var(--mono); color: var(--muted); }
     .pal li[aria-selected="true"] { background: var(--surface-2); color: var(--ink); }
     .pal .empty { padding: 0.9rem 1.1rem; font-size: 0.875rem; }
 
@@ -471,7 +484,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
         </svg>
       </figure>
       <div class="route enter" style="--d:1" id="journey-cap">
-        <div class="dxb"><h3>Dubai</h3><ol>{profile.journey.Dubai.map((t) => <li>{t}</li>)}</ol></div>
+        <div class="dxb"><h3>UAE</h3><ol>{profile.journey.UAE.map((t) => <li>{t}</li>)}</ol></div>
         <div class="mel"><h3>Melbourne</h3><ol>{profile.journey.Melbourne.map((t) => <li>{t}</li>)}</ol></div>
       </div>
 
@@ -497,8 +510,8 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
       <div class="rule"></div>
       <div class="col inner sec-body">
         <ul class="bullets">
-          <li>I'm based in Dubai and I build with LLMs and data. At <strong>Raen AI</strong> I shipped LLM proofs of concept for education and insurance clients, fine-tuning GPT models and taking each one from a business goal to a working prototype.</li>
-          <li>I've also worked close to the business: dashboards, CRM pipelines and client requirements as a Systems Analyst at <strong>Remunera</strong>, and data validation at scale at <strong>Lock and Stock</strong>.</li>
+          <li>I'm based in the UAE and I build with large language models and data. I've fine-tuned GPT models and built prompt and evaluation pipelines for education and insurance use cases, taking each from a business goal to a working prototype.</li>
+          <li>At <strong>Remunera</strong> I built Python pipelines that scrape and clean prospect data, automated tailored outreach with the GPT API, and tracked the funnel in dashboards. Lately I've been digging into <strong>Dubai's property market</strong>: 1.8 million transactions and the AED 2 million Golden Visa line.</li>
           <li>I publish too. My latest is a <a class="ilink" href={profile.publications[0].url}>2026 book chapter</a> on generative AI in dark web policing, alongside two IEEE conference papers.</li>
         </ul>
         <div class="snapshot">
@@ -534,6 +547,30 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
       <div class="rule"></div>
       <div class="col inner sec-body">
         <div class="cards">
+          {bySlug['dubai-real-estate'] && (() => { const p = bySlug['dubai-real-estate']; return (
+            <article class="card card--wide" data-tags="data" style="--c:var(--c-dubai)">
+              <div class="preview">
+                <div class="badges"><span class="badge badge--live">Live</span><span class="badge badge--data">Dubai Land Department data</span></div>
+                <div class="stats">
+                  <div><b>1.8M</b><span>sales transactions</span></div>
+                  <div><b>10.7M</b><span>rent contract lines</span></div>
+                  <div><b>AED 2M</b><span>Golden Visa line studied</span></div>
+                </div>
+                <div class="yield" aria-label="Estimated rental yield at AED 2 million: 5.2 to 6.4 percent">
+                  <span>Estimated rental yield at AED 2M</span>
+                  <span class="bar"><i style="--a:52%;--b:36%"></i></span>
+                  <span class="ends"><span>0%</span><span>5.2 to 6.4%</span><span>10%</span></span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-title"><span class="tile-icon" set:html={'<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 21V9l5-3v15M9 21V4l6 3v14M15 21v-9l5 2v7M2 21h20"/></svg>'} /><h3>{p.name}</h3></div>
+                <p>{p.tagline}. The ranking was backtested across four rounds, 2022 to 2025.</p>
+                <details class="eng"><summary>Show engineering details</summary><p>{p.description}</p></details>
+                <div class="card-foot"><div class="chips">{p.stack.map((t) => <span class="chip">{t}</span>)}</div><span style="display:flex;gap:0.4rem"><a class="icon-btn" href={p.demo} aria-label="Open the live Dubai data page" set:html={'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>'}></a><a class="icon-btn" href={p.repo} aria-label={`${p.name} on GitHub`} set:html={icon.github}></a></span></div>
+              </div>
+            </article>
+          ); })()}
+
           {bySlug['job-market-insights'] && (() => { const p = bySlug['job-market-insights']; return (
             <article class="card card--wide" data-tags="data" style="--c:var(--c-jobs)">
               <div class="preview" id="explorer">
@@ -549,7 +586,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
               </div>
               <div class="card-body">
                 <div class="card-title"><span class="tile-icon" set:html={'<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 19V11M10 19V6M15 19v-9M20 19V4"/></svg>'} /><h3>{p.name}</h3></div>
-                <p>{p.tagline}. Pick a state above: the chart runs on the cleaned dataset.</p>
+                <p>{p.tagline}. I led the team, scraped every ad and wrote most of the code. Pick a state above: the chart runs on the cleaned dataset.</p>
                 <details class="eng"><summary>Show engineering details</summary><p>{p.description}</p></details>
                 <div class="card-foot"><div class="chips">{p.stack.map((t) => <span class="chip">{t}</span>)}</div><a class="icon-btn" href={p.repo} aria-label={`${p.name} on GitHub`} set:html={icon.github}></a></div>
               </div>

@@ -5,7 +5,7 @@
   "evidence": [
     {
       "label": "Shipped",
-      "value": "LLM proofs of concept for education and insurance clients at Raen AI, Dubai"
+      "value": "LLM proofs of concept for education and insurance clients, from business goal to working prototype"
     },
     {
       "label": "Depth",
@@ -24,10 +24,11 @@
     {
       "role": "Systems Analyst",
       "org": "Remunera",
-      "place": "Remote, Melbourne, Australia",
+      "place": "Remote, for a Melbourne-based firm",
       "points": [
-        "Built analytics dashboards and performance-tracking pipelines guiding data-driven content and client-targeting decisions",
-        "Optimised CRM and sales-pipeline workflows with cross-functional stakeholders to lift response rates and reduce conversion friction"
+        "Built Python pipelines to scrape prospect and company data from Apollo.io, then clean, deduplicate and structure it into a reliable dataset for the outreach workflow",
+        "Automated outreach email generation and sending with Python and the GPT API, producing tailored copy for each prospect in place of manual drafting",
+        "Built Google Sheets dashboards to track client acquisition and conversion at each stage of the outreach funnel"
       ],
       "start": "Mar 2025",
       "end": "now"
@@ -35,11 +36,11 @@
     {
       "role": "Data Scientist",
       "org": "Raen AI",
-      "place": "Dubai, UAE (on-site, then remote from Melbourne)",
+      "place": "Dubai, UAE",
       "points": [
-        "Built and shipped AI proofs-of-concept for clients in education and insurance, from business goals to working prototypes",
-        "Fine-tuned GPT-based models for conversational interfaces and knowledge assistants using the OpenAI API, Python, and Streamlit",
-        "Aligned AI prototypes with user experience and feasibility across engineering and business teams"
+        "Built AI proofs of concept for clients in education and insurance, fine-tuning GPT-based models with the OpenAI API, Python and Streamlit",
+        "Defined prompt strategies and model evaluation pipelines for text classification, summarisation and lead generation",
+        "Built and curated a research library of 50 plus peer-reviewed papers to guide model design"
       ],
       "start": "Nov 2023",
       "end": "Jan 2025"
@@ -50,7 +51,8 @@
       "place": "Dubai, UAE",
       "points": [
         "Coordinated collection of 3,000+ academic content items with structured handoff for quality assurance and publication",
-        "Cleaned and validated data across multiple tools, resolving 40+ duplication and formatting issues"
+        "Cleaned and validated data across multiple tools, resolving 40+ duplication and formatting issues",
+        "Reported weekly status against milestones and surfaced blockers, reducing cycle time by around 15 percent"
       ],
       "start": "Feb 2021",
       "end": "Sep 2021"
@@ -118,20 +120,20 @@
   ],
   "headline": "I ship LLM products end to end.",
   "lede": "AI engineer and data scientist in Dubai, open to roles in the UAE and remote.",
-  "workRights": "Australian work rights to March 2029 (subclass 485).",
-  "availability": "Based in Dubai. Open to AI, data science and ML engineering roles in the UAE and remote.",
+  "workRights": "UAE Golden Visa to 2032, so no sponsorship is needed. Also holds Australian work rights to March 2029.",
+  "availability": "Based in the UAE. Open to AI, data science and ML engineering roles in the UAE and remote.",
   "hiddenRepos": [
     "yousufagha/erp-reconciliation"
   ],
-  "intro": "I'm based in Dubai and I build with LLMs and data. At Raen AI I shipped LLM proofs of concept for education and insurance clients, fine-tuning GPT models and taking them from a business goal to a working prototype. I also publish research on generative AI, most recently a 2026 book chapter on its use in policing.",
+  "intro": "I'm based in the UAE and I build with large language models and data: fine-tuned GPT models, prompt and evaluation pipelines, and Python data pipelines that feed real decisions. I also publish research on generative AI, most recently a 2026 book chapter on its use in policing.",
   "glance": [
     {
       "label": "Now",
       "value": "Systems Analyst, Remunera (remote)"
     },
     {
-      "label": "Before",
-      "value": "Data Scientist, Raen AI, Dubai"
+      "label": "Right to work",
+      "value": "UAE Golden Visa to 2032, no sponsorship needed"
     },
     {
       "label": "Published",
@@ -143,7 +145,7 @@
     },
     {
       "label": "Works with",
-      "value": "Python, OpenAI API, RAG, NLP, evals, Azure, AWS, GCP"
+      "value": "Python, OpenAI API, LLM fine-tuning, NLP, evals, Azure, AWS, GCP"
     }
   ],
   "now": [
@@ -161,14 +163,13 @@
     }
   ],
   "journey": {
-    "Dubai": [
-      "Skyline University",
-      "Lock and Stock, 2021",
-      "Raen AI, 2023 to 2025",
+    "UAE": [
+      "Skyline University, Sharjah, 2018 to 2021",
+      "Lock and Stock, Dubai, 2021",
       "Home again, 2026"
     ],
     "Melbourne": [
-      "Master of IT (Advanced), Torrens University",
+      "Master of IT (Advanced), Torrens University, 2024 to 2025",
       "Remunera, 2025 to now (remote)"
     ]
   },

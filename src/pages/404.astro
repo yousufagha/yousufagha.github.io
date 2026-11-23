@@ -1,0 +1,39 @@
+---
+import profile from '../data/profile.json';
+---
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>{`Page not found, ${profile.name}`}</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@400;500&family=Geist+Mono&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg: #09090B; --ink: #EDEDEF; --ink-2: #B4B4BB; --muted: #85858F; --line: #2A2A31; --dxb: #FF8A5B; --mel: #7CB8FF; color-scheme: dark; }
+    @media (prefers-color-scheme: light) { :root { --bg: #FAFAFA; --ink: #18181B; --ink-2: #3F3F46; --muted: #6B6B74; --line: #D9D9DE; --dxb: #E0622F; --mel: #2F6FD6; color-scheme: light; } }
+    * { box-sizing: border-box; margin: 0; }
+    body { min-height: 100svh; display: grid; place-items: center; background: var(--bg); color: var(--ink-2); font: 400 1rem/1.6 "Geist", system-ui, sans-serif; padding: 1.5rem; }
+    main { max-width: 30rem; text-align: center; }
+    .code { font: 400 0.75rem/1 "Geist Mono", ui-monospace, monospace; letter-spacing: 0.1em; color: var(--muted); }
+    h1 { margin-top: 0.8rem; font: 400 clamp(2.2rem, 7vw, 3rem)/1.05 "Instrument Serif", Georgia, serif; color: var(--ink); }
+    .route { margin: 1.6rem auto; width: 12rem; height: 2.5rem; }
+    p { margin-top: 0.4rem; }
+    a { display: inline-block; margin-top: 1.4rem; padding: 0.6rem 1.1rem; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); text-decoration: none; font-size: 0.875rem; }
+    a:hover { border-color: var(--muted); }
+    a:focus-visible { outline: 2px solid var(--mel); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="code">404</p>
+    <h1>This flight was cancelled.</h1>
+    <svg class="route" viewBox="0 0 200 40" aria-hidden="true"><path d="M10 34 Q 100 -14 190 34" fill="none" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="2 6" stroke-linecap="round" /><circle cx="10" cy="34" r="4" fill="var(--dxb)" /><circle cx="190" cy="34" r="4" fill="var(--mel)" /></svg>
+    <p>The page you're after isn't here. The rest of the site is.</p>
+    <a href="/">Back to {profile.name}</a>
+  </main>
+</body>
+</html>
