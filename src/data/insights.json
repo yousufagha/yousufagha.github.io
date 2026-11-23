@@ -1,6 +1,6 @@
 {
   "jobMarket": {
-    "source": "github.com/yousufagha/ITW601, cleaned_data.csv",
+    "source": "github.com/yousufagha/AU-job-market-insights, cleaned_data.csv",
     "distinctSkills": 137,
     "views": [
       {
@@ -11,35 +11,35 @@
         "skills": [
           [
             "AWS",
-            644
+            638
           ],
           [
             "Azure",
-            635
+            634
           ],
           [
             "Python",
-            586
-          ],
-          [
-            "Scala",
-            535
+            585
           ],
           [
             "SQL",
-            527
-          ],
-          [
-            "SSIS",
-            456
-          ],
-          [
-            "Java",
-            447
+            481
           ],
           [
             "Agile",
-            387
+            386
+          ],
+          [
+            "React",
+            329
+          ],
+          [
+            "IT Support",
+            310
+          ],
+          [
+            "Networking",
+            303
           ]
         ]
       },
@@ -55,31 +55,31 @@
           ],
           [
             "AWS",
-            313
+            311
           ],
           [
             "SQL",
-            267
-          ],
-          [
-            "Scala",
-            249
-          ],
-          [
-            "Java",
-            235
+            242
           ],
           [
             "Azure",
             204
           ],
           [
-            "SSIS",
-            159
-          ],
-          [
             "Agile",
             154
+          ],
+          [
+            "Java",
+            153
+          ],
+          [
+            "React",
+            138
+          ],
+          [
+            "CI/CD",
+            136
           ]
         ]
       },
@@ -91,35 +91,35 @@
         "skills": [
           [
             "AWS",
-            165
+            164
           ],
           [
             "Azure",
             135
           ],
           [
-            "Scala",
-            123
-          ],
-          [
-            "React",
-            109
-          ],
-          [
             "Python",
             109
           ],
           [
-            "SSIS",
-            108
-          ],
-          [
-            "SQL",
+            "React",
             101
           ],
           [
             "Agile",
-            98
+            97
+          ],
+          [
+            "SQL",
+            90
+          ],
+          [
+            "DevOps",
+            86
+          ],
+          [
+            "CI/CD",
+            82
           ]
         ]
       },
@@ -134,32 +134,32 @@
             88
           ],
           [
-            "SSIS",
-            82
-          ],
-          [
             "IT Support",
             71
-          ],
-          [
-            "SQL",
-            63
           ],
           [
             "React",
             59
           ],
           [
-            "Scala",
-            56
+            "SQL",
+            58
           ],
           [
             "Python",
             56
           ],
           [
-            "Git",
-            51
+            "AWS",
+            50
+          ],
+          [
+            "Agile",
+            46
+          ],
+          [
+            "Networking",
+            46
           ]
         ]
       },
@@ -171,15 +171,15 @@
         "skills": [
           [
             "Azure",
-            111
+            110
           ],
           [
             "AWS",
-            62
+            60
           ],
           [
             "DevOps",
-            55
+            54
           ],
           [
             "Python",
@@ -190,16 +190,16 @@
             40
           ],
           [
-            "Scala",
-            36
-          ],
-          [
-            "Git",
-            36
-          ],
-          [
             "Networking",
             34
+          ],
+          [
+            "SQL",
+            29
+          ],
+          [
+            "ITIL",
+            24
           ]
         ]
       },
@@ -214,14 +214,6 @@
             41
           ],
           [
-            "SSIS",
-            37
-          ],
-          [
-            "Scala",
-            34
-          ],
-          [
             "Networking",
             30
           ],
@@ -231,15 +223,23 @@
           ],
           [
             "Python",
-            23
-          ],
-          [
-            "AWS",
             22
           ],
           [
-            "Git",
-            19
+            "AWS",
+            21
+          ],
+          [
+            "SQL",
+            16
+          ],
+          [
+            "Active Directory",
+            15
+          ],
+          [
+            "Linux",
+            13
           ]
         ]
       },
@@ -250,36 +250,36 @@
         "ads": 368,
         "skills": [
           [
-            "SSIS",
-            21
-          ],
-          [
             "IT Support",
             17
           ],
           [
             "SQL",
-            16
-          ],
-          [
-            "Scala",
             15
-          ],
-          [
-            "Excel",
-            14
           ],
           [
             "Python",
             13
           ],
           [
-            "Java",
+            "Azure",
             12
           ],
           [
-            "Azure",
-            12
+            "Networking",
+            11
+          ],
+          [
+            "ITIL",
+            10
+          ],
+          [
+            "Agile",
+            10
+          ],
+          [
+            "Java",
+            9
           ]
         ]
       }

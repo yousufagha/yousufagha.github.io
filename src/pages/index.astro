@@ -603,7 +603,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
                 <ol class="bars" id="ex-bars">
                   {all.skills.map(([k, n], i) => <li style={`--i:${i}`}><span class="k">{k}</span><span class="track"><span class="fill" style={`--v:${(n / maxAll).toFixed(3)}`}></span></span><span class="n">{num(n)}</span></li>)}
                 </ol>
-                <p class="ex-note">Go is left out: {num(jm.note.tagged)} ads were tagged with it, only {num(jm.note.genuine)} mean the language.</p>
+                <p class="ex-note">Skills are matched as whole words. My first pass tagged Go in {num(jm.note.tagged)} ads because it matched "good"; only {num(jm.note.genuine)} mean the language.</p>
               </div>
               <div class="card-body">
                 <div class="card-title"><span class="tile-icon" set:html={'<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 19V11M10 19V6M15 19v-9M20 19V4"/></svg>'} /><h3>{p.name}</h3></div>
@@ -625,7 +625,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
               </div>
               <div class="card-body">
                 <div class="card-title"><span class="tile-icon" set:html={'<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 15v-3a8 8 0 0 1 16 0v3M4 15a2 2 0 0 0 2 2h1v-5H6a2 2 0 0 0-2 2Zm16 0a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2Z"/></svg>'} /><h3>{p.name}</h3></div>
-                <p>{p.tagline}.</p>
+                <p>{p.tagline}. Pipelines are built and tested on a small synthetic demo set; real runway data is next.</p>
                 <details class="eng"><summary>Show engineering details</summary><p>{p.description}</p></details>
                 <div class="card-foot"><div class="chips">{p.stack.slice(0, 3).map((t) => <span class="chip">{t}</span>)}</div><a class="icon-btn" href={p.repo} aria-label={`${p.name} on GitHub`} set:html={icon.github}></a></div>
               </div>
@@ -635,7 +635,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
           {bySlug['runway-radar'] && (() => { const p = bySlug['runway-radar']; return (
             <article class="card" data-tags="nlp llm" style="--c:var(--c-runway)">
               <div class="preview" role="img" aria-label="Runway Radar pipeline: runway images and editorial text feed one trend score">
-                <div class="badges"><span class="badge badge--live">Shipped</span><span class="badge badge--data">Multi-modal</span></div>
+                <div class="badges"><span class="badge badge--wip">Prototype</span><span class="badge badge--data">Multi-modal</span></div>
                 <ol class="flow">
                   <li><span class="s">image</span><strong>Runway shots</strong><span>CLIP-style embeddings, palettes</span></li>
                   <li><span class="s">text</span><strong>Editorial copy</strong><span>Transformer and VADER sentiment</span></li>

@@ -37,7 +37,7 @@
       "signals": [
         "DATA 9K+"
       ],
-      "repo": "https://github.com/yousufagha/ITW601",
+      "repo": "https://github.com/yousufagha/AU-job-market-insights",
       "demo": null,
       "record": {
         "figure": "9,000+",
@@ -73,7 +73,7 @@
     {
       "name": "Runway Radar",
       "slug": "runway-radar",
-      "status": "shipped",
+      "status": "prototype",
       "tagline": "Fashion trend detection from runway imagery and editorial text",
       "description": "Dual-pipeline trend spotter: CLIP-style visual embeddings and palette extraction on runway images, transformer and VADER sentiment on editorial text, combined into rising-versus-declining trend scores for styles, colours, and brands.",
       "stack": [
