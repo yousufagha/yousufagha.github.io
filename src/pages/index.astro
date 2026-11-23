@@ -476,7 +476,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
       </div>
 
       <div class="profile">
-        <div class="avatar enter" style="--d:2" aria-hidden="true">{profile.photo ? <img src={profile.photo} alt="" /> : initials}</div>
+        <div class="avatar enter" style="--d:2" aria-hidden="true">{profile.photo ? <img src={profile.photo} alt="" width="68" height="68" /> : initials}</div>
         <div class="enter" style="--d:3">
           <h1>{profile.name}</h1>
           <p class="role">{profile.role}</p>
