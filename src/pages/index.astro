@@ -72,8 +72,8 @@ const cityOf = (place: string) => (/dubai|uae/i.test(place) ? 'dxb' : 'mel');
 let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 const stars = Array.from({ length: 70 }, () => ({ x: 120 + rnd() * 760, y: 18 + rnd() * 170, r: 0.5 + rnd() * 1.3, o: 0.25 + rnd() * 0.6 }));
 const block = (x0: number, x1: number, minH: number, maxH: number) => { const out = []; let x = x0; while (x < x1) { const w = 14 + rnd() * 26; const h = minH + rnd() * (maxH - minH); out.push({ x, w: Math.min(w, x1 - x), h }); x += w + 2; } return out; };
-const dxb = block(20, 360, 34, 105);
-const mel = block(640, 985, 40, 120);
+const dxb = block(18, 470, 16, 46);
+const mel = [...block(560, 616, 18, 44), ...block(916, 992, 18, 50)];
 const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b.h / 14) }, () => rnd() > 0.62 ? { x: b.x + 3 + rnd() * Math.max(1, b.w - 6), y: 300 - 6 - rnd() * (b.h - 10) } : null).filter(Boolean));
 ---
 <!doctype html>
@@ -464,12 +464,33 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
           <use href="#route" fill="none" stroke="#FFF6EC" stroke-opacity="0.45" stroke-width="1.6" stroke-dasharray="2 7" stroke-linecap="round" />
           <g fill="#0C1322">
             {dxb.map((b) => <rect x={b.x.toFixed(1)} y={(300 - b.h).toFixed(1)} width={b.w.toFixed(1)} height={b.h.toFixed(1)} rx="1.5" />)}
-            <path d="M238 300 L238 150 L243 150 L243 112 L247 112 L247 78 L250 78 L250 40 L252 14 L254 40 L254 78 L257 78 L257 112 L261 112 L261 150 L266 150 L266 300 Z" />
             {mel.map((b) => <rect x={b.x.toFixed(1)} y={(300 - b.h).toFixed(1)} width={b.w.toFixed(1)} height={b.h.toFixed(1)} rx="1.5" />)}
-            <path d="M716 300 L716 110 L722 102 L742 102 L748 110 L748 300 Z" />
+            <path d="M52 300 L52 140 L54 128 L56 140 Q 104 182 98 300 Z" />
+            <path fill-rule="evenodd" d="M118 300 V170 H164 V300 Z M125 300 V178 H157 V300 Z" />
+            <path d="M232 300 L232 168 L237 168 L237 134 L241 134 L241 104 L244 104 L244 72 L247 72 L247 44 L250 44 L252 8 L254 44 L257 44 L257 72 L260 72 L260 104 L263 104 L263 134 L267 134 L267 168 L272 168 L272 300 Z" />
+            <path d="M292 300 Q 332 268 374 300 Z" />
+            <path fill-rule="evenodd" d="M333 220 C 362 222 370 270 345 286 C 322 300 298 276 304 248 C 308 228 320 219 333 220 Z M335 238 C 350 240 352 266 340 272 C 328 278 318 264 322 250 C 324 242 329 237 335 238 Z" />
+            <path d="M392 300 V118 L402 92 L410 118 V300 Z" />
+            <path d="M418 300 V146 L426 126 L433 146 V300 Z" />
+            <path d="M622 300 V276 H668 V300 Z" />
+            <path d="M632 276 Q 641 210 645 44 Q 649 210 658 276 Z" />
+            <path d="M684 300 V266 H800 V300 Z" />
+            <path d="M716 266 Q 731 232 746 266 Z" />
+            <path d="M728 238 L734 238 L734 226 L731 220 L728 226 Z" />
+            <path d="M780 266 V224 L784 216 L788 224 V266 Z" />
+            <path d="M826 300 V114 L832 106 L852 106 L858 114 V300 Z" />
+            <path d="M878 300 V170 L872 160 L878 150 V112 L892 104 L906 112 V150 L912 160 L906 170 V300 Z" />
             <rect x="0" y="298" width="1000" height="22" />
           </g>
-          <rect x="718" y="102" width="28" height="10" fill="#F5C76A" opacity="0.9" />
+          <path d="M56 214 L84 214" stroke="#2A3550" stroke-width="5" />
+          <path d="M125 300 V178 H157 V300" fill="none" stroke="#D9B45A" stroke-opacity="0.55" stroke-width="1.4" />
+          <path d="M118 300 V170 H164 V300" fill="none" stroke="#D9B45A" stroke-opacity="0.8" stroke-width="1.6" />
+          <rect x="828" y="106" width="28" height="10" fill="#F5C76A" opacity="0.9" />
+          <circle cx="784" cy="242" r="5" fill="none" stroke="#FFD58A" stroke-opacity="0.8" stroke-width="1.2" />
+          <g fill="none" stroke="#FFD58A" stroke-opacity="0.55" stroke-width="1.3">
+            <path d="M690 296 v-8 a4 4 0 0 1 8 0 v8 M702 296 v-8 a4 4 0 0 1 8 0 v8 M752 296 v-8 a4 4 0 0 1 8 0 v8 M764 296 v-8 a4 4 0 0 1 8 0 v8 M791 296 v-8 a3 3 0 0 1 6 0 v8" />
+            <path d="M645 70 V 260" stroke-opacity="0.25" />
+          </g>
           <g fill="#FFD58A">{lights.map((l) => <rect x={l.x.toFixed(1)} y={l.y.toFixed(1)} width="2.2" height="2.2" opacity="0.75" />)}</g>
           <circle cx="190" cy="238" r="5" fill="#FF8A5B" stroke="#FFF6EC" stroke-width="2" />
           <circle cx="812" cy="238" r="5" fill="#7CB8FF" stroke="#FFF6EC" stroke-width="2" />
@@ -494,7 +515,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
           <h1>{profile.name}</h1>
           <p class="role">{profile.role}</p>
           <p class="meta">
-            <span>Dubai, UAE</span>
+            <span>UAE and Australia</span>
             <span id="clock">GST</span>
             <span><i class="dot" aria-hidden="true"></i>Open to work</span>
           </p>
@@ -637,7 +658,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     <div class="band" aria-hidden="true"></div>
 
     <section id="experience" aria-labelledby="exp-h">
-      <div class="col inner sec-head"><h2 id="exp-h">Experience</h2><span class="aside"><span style="color:var(--dxb)">Dubai</span> and <span style="color:var(--mel)">Melbourne</span></span></div>
+      <div class="col inner sec-head"><h2 id="exp-h">Experience</h2><span class="aside"><span style="color:var(--dxb)">UAE</span> and <span style="color:var(--mel)">Australia</span></span></div>
       <div class="rule"></div>
       <div class="col inner sec-body">
         <ol class="jobs">
@@ -707,7 +728,7 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
 
     <div class="rule"></div>
     <footer>
-      <div class="col inner"><span>© {year} {profile.name}</span><span>Designed and built by me, in Dubai</span></div>
+      <div class="col inner"><span>© {year} {profile.name}</span><span>Designed and built by me, in the UAE</span></div>
     </footer>
   </main>
 
