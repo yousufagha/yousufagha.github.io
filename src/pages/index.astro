@@ -359,16 +359,13 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
     .certs li span:last-child { font: 400 0.75rem/1.5 var(--mono); color: var(--muted); white-space: nowrap; }
 
     /* ---------- GitHub ---------- */
-    .gh { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 1rem; }
-    .gh-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 0.8rem; font: 400 0.75rem/1.3 var(--mono); color: var(--muted); }
-    .gh-top b { color: var(--ink); font-weight: 500; }
+    .gh { display: block; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 1.5rem 1.4rem 1.2rem; transition: border-color 200ms var(--ease); }
+    .gh:hover { border-color: var(--line-2); }
     .graph-svg { display: block; width: 100%; height: auto; }
-    .repos { list-style: none; padding: 0; margin-top: 0.9rem; border-top: 1px solid var(--line); }
-    .repos li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px dashed var(--line-2); font: 400 0.75rem/1.4 var(--mono); }
-    .repos li:last-child { border-bottom: 0; }
-    .repos a { color: var(--ink); }
-    .repos a:hover { text-decoration: underline; text-underline-offset: 3px; }
-    .repos span { color: var(--muted); }
+    .gh-link { display: inline-flex; gap: 0.4rem; margin-top: 1.1rem; font: 400 0.875rem/1 var(--mono); color: var(--live); }
+    .gh-link span { transition: transform 200ms var(--ease); }
+    .gh:hover .gh-link span { transform: translateX(3px); }
+    @media (prefers-reduced-motion: reduce) { .gh:hover .gh-link span { transform: none; } }
 
     /* ---------- Contact ---------- */
     .cta { text-align: center; padding-block: 2.5rem 2.75rem; }
@@ -649,16 +646,10 @@ const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b
       <div class="col inner sec-head"><h2 id="gh-h">GitHub</h2><a class="aside ilink" href={profile.contact.github}>@yousufagha</a></div>
       <div class="rule"></div>
       <div class="col inner sec-body">
-        <div class="gh">
-          <div class="gh-top"><span>{hasStats ? <><b>{num(ghStats.total)}</b> contributions in {ghStats.year}</> : <>Contributions in {year}</>}</span><span>Rebuilt daily</span></div>
+        <a class="gh" href={profile.contact.github} aria-label="GitHub profile, yousufagha">
           {graphSvg ? <div role="img" aria-label={`GitHub contribution graph, ${year}`} set:html={graphSvg} /> : <img src="/github-contribution.svg" alt={`GitHub contribution graph, ${year}`} width="747" height="103" style="width:100%;height:auto" />}
-          {hasStats && topRepos.length > 0 && (
-            <ul class="repos">
-              {topRepos.map((r) => <li><a href={r.url}>{r.name.replace('yousufagha/', '')}</a><span>{num(r.commits)} commits</span></li>)}
-              {otherRepos > 0 && <li><span>and {num(otherRepos)} more public</span><span></span></li>}
-            </ul>
-          )}
-        </div>
+          <span class="gh-link">github.com/yousufagha <span aria-hidden="true">→</span></span>
+        </a>
       </div>
     </section>
 
