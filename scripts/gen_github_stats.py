@@ -11,6 +11,10 @@ import sys, os, json, datetime, urllib.request, urllib.error
 
 API = "https://api.github.com/graphql"
 
+# Repos never named on the site (client work that is not a portfolio piece).
+# Excluded from the top-repos list and from the repo count.
+HIDDEN_REPOS = {"yousufagha/erp-reconciliation"}
+
 # contributionsCollection accepts a window of at most one year, which is exactly
 # what we want: 1 Jan of the current year through now.
 QUERY = """
@@ -87,6 +91,7 @@ def shape(c, year):
         }
         for r in c["commitContributionsByRepository"]
         if not r["repository"]["isPrivate"]
+        and r["repository"]["nameWithOwner"].lower() not in HIDDEN_REPOS
     ]
     repos.sort(key=lambda r: r["commits"], reverse=True)
 

@@ -1,0 +1,361 @@
+{
+  "jobMarket": {
+    "source": "github.com/yousufagha/ITW601, cleaned_data.csv",
+    "distinctSkills": 137,
+    "views": [
+      {
+        "id": "ALL",
+        "label": "All",
+        "name": "Australia",
+        "ads": 9000,
+        "skills": [
+          [
+            "AWS",
+            644
+          ],
+          [
+            "Azure",
+            635
+          ],
+          [
+            "Python",
+            586
+          ],
+          [
+            "Scala",
+            535
+          ],
+          [
+            "SQL",
+            527
+          ],
+          [
+            "SSIS",
+            456
+          ],
+          [
+            "Java",
+            447
+          ],
+          [
+            "Agile",
+            387
+          ]
+        ]
+      },
+      {
+        "id": "NSW",
+        "label": "NSW",
+        "name": "New South Wales",
+        "ads": 3565,
+        "skills": [
+          [
+            "Python",
+            319
+          ],
+          [
+            "AWS",
+            313
+          ],
+          [
+            "SQL",
+            267
+          ],
+          [
+            "Scala",
+            249
+          ],
+          [
+            "Java",
+            235
+          ],
+          [
+            "Azure",
+            204
+          ],
+          [
+            "SSIS",
+            159
+          ],
+          [
+            "Agile",
+            154
+          ]
+        ]
+      },
+      {
+        "id": "VIC",
+        "label": "VIC",
+        "name": "Victoria",
+        "ads": 2050,
+        "skills": [
+          [
+            "AWS",
+            165
+          ],
+          [
+            "Azure",
+            135
+          ],
+          [
+            "Scala",
+            123
+          ],
+          [
+            "React",
+            109
+          ],
+          [
+            "Python",
+            109
+          ],
+          [
+            "SSIS",
+            108
+          ],
+          [
+            "SQL",
+            101
+          ],
+          [
+            "Agile",
+            98
+          ]
+        ]
+      },
+      {
+        "id": "QLD",
+        "label": "QLD",
+        "name": "Queensland",
+        "ads": 1148,
+        "skills": [
+          [
+            "Azure",
+            88
+          ],
+          [
+            "SSIS",
+            82
+          ],
+          [
+            "IT Support",
+            71
+          ],
+          [
+            "SQL",
+            63
+          ],
+          [
+            "React",
+            59
+          ],
+          [
+            "Scala",
+            56
+          ],
+          [
+            "Python",
+            56
+          ],
+          [
+            "Git",
+            51
+          ]
+        ]
+      },
+      {
+        "id": "ACT",
+        "label": "ACT",
+        "name": "ACT",
+        "ads": 803,
+        "skills": [
+          [
+            "Azure",
+            111
+          ],
+          [
+            "AWS",
+            62
+          ],
+          [
+            "DevOps",
+            55
+          ],
+          [
+            "Python",
+            41
+          ],
+          [
+            "Agile",
+            40
+          ],
+          [
+            "Scala",
+            36
+          ],
+          [
+            "Git",
+            36
+          ],
+          [
+            "Networking",
+            34
+          ]
+        ]
+      },
+      {
+        "id": "WA",
+        "label": "WA",
+        "name": "Western Australia",
+        "ads": 508,
+        "skills": [
+          [
+            "Azure",
+            41
+          ],
+          [
+            "SSIS",
+            37
+          ],
+          [
+            "Scala",
+            34
+          ],
+          [
+            "Networking",
+            30
+          ],
+          [
+            "IT Support",
+            24
+          ],
+          [
+            "Python",
+            23
+          ],
+          [
+            "AWS",
+            22
+          ],
+          [
+            "Git",
+            19
+          ]
+        ]
+      },
+      {
+        "id": "SA",
+        "label": "SA",
+        "name": "South Australia",
+        "ads": 368,
+        "skills": [
+          [
+            "SSIS",
+            21
+          ],
+          [
+            "IT Support",
+            17
+          ],
+          [
+            "SQL",
+            16
+          ],
+          [
+            "Scala",
+            15
+          ],
+          [
+            "Excel",
+            14
+          ],
+          [
+            "Python",
+            13
+          ],
+          [
+            "Java",
+            12
+          ],
+          [
+            "Azure",
+            12
+          ]
+        ]
+      }
+    ],
+    "note": {
+      "skill": "Go",
+      "tagged": 841,
+      "genuine": 42
+    }
+  },
+  "beats": {
+    "source": "github.com/yousufagha/beats-by-dre-externship, cleaned_amazon_reviews.csv",
+    "reviews": 1200,
+    "products": [
+      [
+        "Powerbeats Pro",
+        4.22,
+        149
+      ],
+      [
+        "Fit Pro",
+        4.21,
+        151
+      ],
+      [
+        "Studio Pro",
+        4.14,
+        167
+      ],
+      [
+        "EP",
+        4.08,
+        160
+      ],
+      [
+        "Solo 4",
+        4.03,
+        118
+      ],
+      [
+        "Studio Buds+",
+        4.02,
+        142
+      ],
+      [
+        "Flex",
+        3.97,
+        154
+      ],
+      [
+        "Studio3",
+        3.86,
+        159
+      ]
+    ],
+    "regions": [
+      [
+        "US",
+        324
+      ],
+      [
+        "AU",
+        315
+      ],
+      [
+        "UK",
+        237
+      ],
+      [
+        "CA",
+        213
+      ],
+      [
+        "NZ",
+        111
+      ]
+    ]
+  }
+}

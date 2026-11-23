@@ -34,7 +34,7 @@ def build_svg(levels, year):
     if not levels:
         raise SystemExit("No contribution data parsed.")
 
-    palette = ['#EBEDF0', '#9BD9BE', '#5FBF95', '#2E9C6F', '#1E7A5A']
+    palette = ['#262B32', '#1F3B5A', '#2D5D8E', '#4C88C4', '#8CBDEE']
     cell, gap, pad = 11, 3, 4
     label_h = 15   # room for the month row above the grid
 
@@ -65,8 +65,8 @@ def build_svg(levels, year):
                 seen.add(d.month)
                 x = pad + ci * (cell + gap)
                 labels.append(
-                    f'<text x="{x}" y="{pad + 10}" font-family="ui-monospace, SFMono-Regular, monospace" '
-                    f'font-size="9" letter-spacing="0.5" fill="#43514B">{MONTHS[d.month - 1]}</text>'
+                    f'<text x="{x}" y="{pad + 10}" font-family="Atkinson Hyperlegible Mono, ui-monospace, monospace" '
+                    f'font-size="9" letter-spacing="0.5" fill="#A0A7B0">{MONTHS[d.month - 1]}</text>'
                 )
                 break
 

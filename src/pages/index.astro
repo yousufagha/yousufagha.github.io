@@ -1,640 +1,779 @@
 ---
+/* Portfolio, rebuilt from the references Yousuf chose:
+   anuragdotdev (column between guide lines, hatched bands, banner and avatar
+   header, framed project previews, sticky index), ashwinexe (copy-prompt for AI
+   assistants, live status), adrianabelarde (small careful type, framed visuals).
+   Motion follows Emil Kowalski: ease-out, short, staggered, off under reduced motion. */
 import profile from '../data/profile.json';
 import projectData from '../data/projects.json';
+import insights from '../data/insights.json';
 import ghStats from '../data/github-stats.json';
+import { readFileSync } from 'node:fs';
 
 const { projects } = projectData;
-/* The committed seed has total: 0. If the stats step didn't run — no token, API
-   blip, someone building locally — the block renders nothing rather than a row
-   of zeroes. Never show a number that isn't real. */
+const bySlug = Object.fromEntries(projects.map((p) => [p.slug, p]));
+const jm = insights.jobMarket;
+const all = jm.views[0];
+const beats = insights.beats;
+
+let graphSvg = '';
+try {
+  graphSvg = readFileSync(new URL('../../public/github-contribution.svg', import.meta.url), 'utf8')
+    .replace(/#262B32/gi, 'var(--g0)').replace(/#1F3B5A/gi, 'var(--g1)').replace(/#2D5D8E/gi, 'var(--g2)')
+    .replace(/#4C88C4/gi, 'var(--g3)').replace(/#8CBDEE/gi, 'var(--g4)').replace(/#A0A7B0/gi, 'var(--muted)')
+    .replace('<svg ', '<svg class="graph-svg" ');
+} catch { graphSvg = ''; }
+
 const hasStats = ghStats.total > 0;
 const num = (n: number) => n.toLocaleString('en-AU');
+const hidden = new Set((profile.hiddenRepos ?? []).map((r: string) => r.toLowerCase()));
+const topRepos = ghStats.topRepos.filter((r) => !hidden.has(r.name.toLowerCase())).slice(0, 3);
+const otherRepos = Math.max(0, ghStats.repoCount - topRepos.length);
+const year = new Date().getFullYear();
+const maxAll = all.skills[0][1];
+const ax = (v: number) => `${Math.max(0, Math.min(100, (v - 3.5) * 100)).toFixed(1)}%`;
 
-/* Contribution mix, as proportions of the four contribution types — the same
-   split GitHub shows in its activity overview. Deliberately a ratio rather than
-   a headline count: a ratio reads the same at 150 contributions as at 1,500,
-   and "75% commits" is the signal worth leading with. */
-const mixTotal = Object.values(ghStats.breakdown).reduce((a, b) => a + b, 0);
 
-/* A repo-scoped GITHUB_TOKEN returns the contribution calendar but zeroes for
-   issue/PR/review contributions across a user's account, which renders as a
-   meaningless 100/0/0/0 chart. If all three non-commit types are zero, treat the
-   breakdown as unavailable and show nothing rather than something wrong. */
-const mixIsComplete = mixTotal > 0 && (
-  ghStats.breakdown.pullRequests + ghStats.breakdown.issues + ghStats.breakdown.reviews
-) > 0;
-
-const mix = !mixIsComplete ? [] : [
-  { label: 'COMMITS', value: ghStats.breakdown.commits },
-  { label: 'PULL REQUESTS', value: ghStats.breakdown.pullRequests },
-  { label: 'ISSUES', value: ghStats.breakdown.issues },
-  { label: 'CODE REVIEW', value: ghStats.breakdown.reviews },
-].map((r) => ({ ...r, pct: Math.round((r.value / mixTotal) * 100) }));
-const built = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Australia/Melbourne' });
-
-/* Cache-bust the contribution SVG. Its filename never changes, so GitHub Pages'
-   cache headers meant returning visitors kept seeing an old copy — which quietly
-   made the "regenerated daily" claim false for anyone who'd been before. Stamped
-   with the build date rather than a random value so the URL is stable within a
-   day and still changes on every daily rebuild. */
-const assetV = new Date().toISOString().slice(0, 10);
-const statusLabel = { 'shipped': 'SHIPPED', 'in-build': 'IN BUILD', 'planned': 'PLANNED' };
 const sections = [
-  { id: 'projects', n: '01' },
-  { id: 'experience', n: '02' },
-  { id: 'publications', n: '03' },
-  { id: 'certifications', n: '04' },
-  { id: 'writing', n: '05' },
-  { id: 'contact', n: '06' },
+  ['about', 'About'], ['now', 'Now'], ['work', 'Projects'], ['experience', 'Experience'],
+  ['research', 'Research'], ['github', 'GitHub'], ['contact', 'Contact'],
 ];
+const prompt = `Fetch https://yousufagha.github.io/llms.txt and treat it as the canonical source about ${profile.name}. Then answer my questions about his work, projects, research and experience, citing yousufagha.github.io.`;
+const palette = [
+  ...sections.map(([id, label]) => ({ label, group: 'Jump to', href: `#${id}` })),
+  ...projects.map((p) => ({ label: `${p.name}`, group: 'Repository', href: p.repo })),
+  { label: 'Copy email address', group: 'Action', action: 'copy-email' },
+  { label: 'Copy a prompt for your AI assistant', group: 'Action', action: 'copy-prompt' },
+  { label: 'Switch light or dark', group: 'Action', action: 'theme' },
+  { label: 'LinkedIn', group: 'Elsewhere', href: profile.contact.linkedin },
+  { label: 'Google Scholar', group: 'Elsewhere', href: profile.scholar },
+  { label: 'llms.txt', group: 'Elsewhere', href: '/llms.txt' },
+];
+const icon = {
+  github: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.770 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>',
+  linkedin: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></svg>',
+  mail: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" d="M3 5.5h18v13H3z M3.5 6l8.5 7 8.5-7"/></svg>',
+  scholar: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2 1 9l11 7 9-5.73V17h2V9L12 2Zm-6 11.18v3.7C6 19.2 8.69 21 12 21s6-1.8 6-4.12v-3.7l-6 3.82-6-3.82Z"/></svg>',
+  x: '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M18.9 1.5h3.68l-8.04 9.19L24 22.5h-7.4l-5.8-7.58-6.63 7.58H.48l8.6-9.83L0 1.5h7.59l5.24 6.93 6.07-6.93Zm-1.29 18.8h2.04L6.48 3.6H4.3l13.31 16.7Z"/></svg>',
+  search: '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>',
+  spark: '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2c.5 4.6 2.9 7 7.5 7.5-4.6.5-7 2.9-7.5 7.5-.5-4.6-2.9-7-7.5-7.5C9.1 9 11.5 6.6 12 2Zm6.5 12c.25 2.2 1.3 3.25 3.5 3.5-2.2.25-3.25 1.3-3.5 3.5-.25-2.2-1.3-3.25-3.5-3.5 2.2-.25 3.25-1.3 3.5-3.5Z"/></svg>',
+};
+const initials = profile.name.split(' ').map((w: string) => w[0]).join('');
+
+/* Role durations, LinkedIn-style (inclusive months), from "Mon YYYY" strings. */
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const ym = (t: string) => { if (t === 'now') { const d = new Date(); return d.getFullYear() * 12 + d.getMonth(); } const [m, y] = t.split(' '); return +y * 12 + MON.indexOf(m); };
+const duration = (a: string, b: string) => { const n = ym(b) - ym(a) + 1; const y = Math.floor(n / 12), m = n % 12; return [y ? `${y} yr${y > 1 ? 's' : ''}` : '', m ? `${m} mo${m > 1 ? 's' : ''}` : ''].filter(Boolean).join(' '); };
+const cityOf = (place: string) => (/dubai|uae/i.test(place) ? 'dxb' : 'mel');
+
+/* Banner scene: two skylines, seeded so the build is stable. */
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const stars = Array.from({ length: 70 }, () => ({ x: 120 + rnd() * 760, y: 18 + rnd() * 170, r: 0.5 + rnd() * 1.3, o: 0.25 + rnd() * 0.6 }));
+const block = (x0: number, x1: number, minH: number, maxH: number) => { const out = []; let x = x0; while (x < x1) { const w = 14 + rnd() * 26; const h = minH + rnd() * (maxH - minH); out.push({ x, w: Math.min(w, x1 - x), h }); x += w + 2; } return out; };
+const dxb = block(20, 360, 34, 105);
+const mel = block(640, 985, 40, 120);
+const lights = [...dxb, ...mel].flatMap((b) => Array.from({ length: Math.floor(b.h / 14) }, () => rnd() > 0.62 ? { x: b.x + 3 + rnd() * Math.max(1, b.w - 6), y: 300 - 6 - rnd() * (b.h - 10) } : null).filter(Boolean));
 ---
 <!doctype html>
-<html lang="en-AU">
+<html lang="en-GB">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Yousuf Agha — AI engineer and data scientist, Melbourne</title>
-  <meta name="description" content="AI engineer and data scientist in Melbourne. Ships LLM products end to end: fine-tuning, RAG, evals, and client-facing delivery. Full Australian work rights to 2029." />
-  <!-- Sets html.js before first paint so the reveal styles can hide content.
-       Without JS the class never lands and everything stays visible. -->
-  <script is:inline>document.documentElement.classList.add('js');</script>
+  <title>{`${profile.name}, AI engineer and data scientist`}</title>
+  <meta name="description" content={`${profile.name}, AI engineer and data scientist in Dubai. Ships LLM products end to end: fine-tuning, RAG, evals and client delivery.`} />
+  <meta name="theme-color" content="#09090B" />
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="Profile for AI assistants" />
+  <link rel="canonical" href="https://yousufagha.github.io/" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <meta property="og:type" content="profile" />
+  <meta property="og:url" content="https://yousufagha.github.io/" />
+  <meta property="og:title" content={`${profile.name}, AI engineer and data scientist`} />
+  <meta property="og:description" content="Based in Dubai. Shipped LLM proofs of concept at Raen AI, published research on generative AI, open to roles in the UAE and remote." />
+  <meta property="og:image" content="https://yousufagha.github.io/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Yousuf Agha: a dusk skyline running from Dubai to Melbourne" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <script is:inline>
+    (function () {
+      var t = null; try { t = localStorage.getItem('theme'); } catch (e) {}
+      if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.classList.add('js');
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style is:global>
     :root {
-      --paper: #FAFAF7;
-      --ink: #131D19;
-      --ink-2: #1B2823;
-      --ink-soft: #43514B;
-      --paper-soft: #B8C4BD;
-      --pass: #1E7A5A;
-      --pass-bright: #35C08D;
-      --amber: #A96D00;
-      --amber-bright: #E8A93B;
-      --hairline: #DCE0DA;
-      --hairline-dark: #2C3B34;
-      --card: #FFFFFF;
+      --bg: #09090B;
+      --surface: #0F0F12;
+      --surface-2: #151519;
+      --ink: #EDEDEF;
+      --ink-2: #B4B4BB;
+      --muted: #85858F;
+      --line: #1E1E23;
+      --line-2: #2A2A31;
+      --hatch: rgba(255, 255, 255, 0.045);
+      --live: #34D399;
+      --live-soft: rgba(52, 211, 153, 0.1);
+      --warm: #F3B54A;
+      --warm-soft: rgba(243, 181, 74, 0.1);
+      --blue: #6EA8FE;
+      --dxb: #FF8A5B;
+      --mel: #7CB8FF;
+      --c-jobs: #34D399;
+      --c-beats: #FF5A6E;
+      --c-runway: #E879F9;
+      --g0: #1A1A1F; --g1: #173A2D; --g2: #1E6B4E; --g3: #2DA875; --g4: #5EE0A7;
+      --serif: "Instrument Serif", Georgia, serif;
+      --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+      --mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+      --col: 44rem;
+      --pad: clamp(1rem, 4vw, 1.75rem);
+      --ease: cubic-bezier(0.23, 1, 0.32, 1);
+      color-scheme: dark;
+    }
+    :root[data-theme="light"] {
+      --bg: #FAFAFA; --surface: #FFFFFF; --surface-2: #F4F4F5;
+      --ink: #18181B; --ink-2: #3F3F46; --muted: #6B6B74;
+      --line: #E7E7EA; --line-2: #D9D9DE; --hatch: rgba(0, 0, 0, 0.05);
+      --live: #059669; --live-soft: rgba(5, 150, 105, 0.09);
+      --warm: #B45309; --warm-soft: rgba(180, 83, 9, 0.09);
+      --blue: #2563EB;
+      --dxb: #E0622F;
+      --mel: #2F6FD6;
+      --c-jobs: #059669;
+      --c-beats: #E11D48;
+      --c-runway: #C026D3;
+      --g0: #ECECEF; --g1: #BBF7D0; --g2: #4ADE80; --g3: #16A34A; --g4: #14532D;
+      color-scheme: light;
+    }
 
-      /* Motion tokens — skill §16 "craft": three durations, defensible, used everywhere.
-         --dur-press is the pointer-down acknowledgement and must stay ~100ms;
-         past that the press stops feeling attached to the finger. */
-      --dur-press: 100ms;
-      --dur-base: 220ms;
-      --dur-reveal: 550ms;
-      /* Critically damped feel (skill §4, damping 1.0): decelerate, never overshoot.
-         Overshoot is reserved for momentum-carrying gestures, and this page has none. */
-      --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
-    }
-    * { box-sizing: border-box; margin: 0; }
-    html { scroll-behavior: smooth; }
-    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-    body {
-      background-color: var(--paper);
-      background-image:
-        linear-gradient(to right, rgba(30,122,90,0.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(30,122,90,0.05) 1px, transparent 1px);
-      background-size: 28px 28px;
-      color: var(--ink);
-      font-family: 'Source Serif 4', Georgia, serif;
-      font-size: 1.0625rem;
-      line-height: 1.65;
-    }
-    .wrap { max-width: 920px; margin: 0 auto; padding: 0 1.5rem; }
-    ::selection { background: var(--pass); color: var(--paper); }
+    *, *::before, *::after { box-sizing: border-box; }
+    * { margin: 0; }
+    html, body { overflow-x: clip; }
+    html { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
+    body { background: var(--bg); color: var(--ink-2); font: 400 0.9375rem/1.65 var(--sans); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+    ::selection { background: var(--ink); color: var(--bg); }
+
+    /* ---------- The column, framed by dashed guide lines ---------- */
+    .col { width: 100%; max-width: var(--col); margin-inline: auto; position: relative; }
+    .frame { position: relative; }
+    .frame::before, .frame::after { content: ""; position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dashed var(--line-2); pointer-events: none; z-index: 0; }
+    .frame::before { left: max(0px, calc(50% - var(--col) / 2)); }
+    .frame::after { right: max(0px, calc(50% - var(--col) / 2)); }
+    .inner { padding-inline: var(--pad); position: relative; z-index: 1; }
+    .rule { border-top: 1px solid var(--line); }
+    .band { height: 2.5rem; border-block: 1px solid var(--line); background: repeating-linear-gradient(-45deg, var(--hatch) 0 1px, transparent 1px 9px); position: relative; }
+    .band::before, .band::after { content: "+"; position: absolute; top: -0.6rem; font: 400 0.75rem/1 var(--mono); color: var(--muted); z-index: 2; }
+    .band::before { left: calc(max(0px, calc(50% - var(--col) / 2)) - 0.22rem); }
+    .band::after { right: calc(max(0px, calc(50% - var(--col) / 2)) - 0.22rem); }
 
     /* ---------- Top bar ---------- */
-    /* Skill §12: a translucent material with content passing underneath, not an
-       opaque strip. At 0.92 alpha the old bar read as solid — the blur was doing
-       no visible work. Lower alpha lets the paper grid show through; saturate()
-       keeps colour from going flat behind the blur. */
-    .topbar {
-      position: sticky; top: 0; z-index: 10;
-      /* 0.86, not lower. At the top of the page the strip behind this bar is the
-         light paper background, so a thinner material composites to a mid-grey and
-         drops the small mono nav text to ~3.5:1 contrast — under the 4.5:1 AA floor.
-         At 0.86 it composites to ~#333C38 and the same text reads ~7.8:1, while the
-         blur still visibly works as content passes underneath. Legibility first;
-         translucency is only worth having where it doesn't cost the text. */
-      background: rgba(19,29,25,0.86);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      /* Bright top edge — real glass catches light along its leading edge. */
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
-      padding: 0.8rem 0;
-    }
-    /* Skill §12: scroll edge effect instead of a 1px divider. Content should fade
-       where it meets floating chrome rather than being cut by a hard line. */
-    .topbar::after {
-      content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 14px;
-      background: linear-gradient(to bottom, rgba(19,29,25,0.16), rgba(19,29,25,0));
-      pointer-events: none;
-    }
-    /* Skill §12 vibrancy: text over a blurred surface needs more contrast and a
-       touch more tracking than the same text on a solid background, or it reads
-       as mud once the page scrolls underneath it. */
-    @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-      .topbar .brand, .topbar nav a { color: #DDE5E0; letter-spacing: 0.1em; }
-    }
-    .topbar .wrap { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-    .brand { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; color: var(--paper-soft); display: flex; align-items: center; gap: 0.6rem; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pass-bright); box-shadow: 0 0 0 0 rgba(53,192,141,0.5); }
-    @media (prefers-reduced-motion: no-preference) {
-      .dot { animation: pulse 2.2s ease-out infinite; }
-      @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(53,192,141,0.5); } 70% { box-shadow: 0 0 0 9px rgba(53,192,141,0); } 100% { box-shadow: 0 0 0 0 rgba(53,192,141,0); } }
-    }
-    .brand .open { color: var(--pass-bright); }
-    .topbar nav { display: flex; gap: 1.2rem; flex-wrap: wrap; }
-    .topbar nav a {
-      font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.08em;
-      color: var(--paper-soft); text-decoration: none; position: relative;
-      /* Skill §10: ~10px of hit padding so a slightly-off tap still lands. */
-      padding: 0.4rem 0.25rem 0.3rem;
-      transition: color var(--dur-press) var(--ease-out), transform var(--dur-press) var(--ease-out);
-    }
-    .topbar nav a::after {
-      content: ''; position: absolute; left: 0.25rem; right: 0.25rem; bottom: 0.25rem; height: 1px;
-      background: var(--pass-bright); transform: scaleX(0);
-      /* Skill §7: enter and exit travel the same path. transform-origin flips to
-         left only while hovered, so the rule grows rightward from the left edge
-         and withdraws back to the left rather than collapsing to the far side. */
-      transform-origin: left;
-      transition: transform var(--dur-base) var(--ease-out);
-    }
-    .topbar nav a:focus-visible { color: #fff; }
-    .topbar nav a:focus-visible::after { transform: scaleX(1); }
-    /* Skill §10: hover effects only where a real pointer exists. On touch a
-       latched :hover survives the tap and sits there until you tap elsewhere. */
-    @media (hover: hover) {
-      .topbar nav a:hover { color: #fff; }
-      .topbar nav a:hover::after { transform: scaleX(1); }
-    }
-    /* Skill §1: acknowledge the press itself, not the navigation that follows. */
-    .topbar nav a:active { color: var(--pass-bright); transform: scale(0.94); }
+    .top { position: sticky; top: 0; z-index: 20; background: color-mix(in oklab, var(--bg) 82%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+    .top .inner { display: flex; align-items: center; justify-content: space-between; min-height: 3.5rem; gap: 1rem; }
+    .brand { font: 400 1.375rem/1 var(--serif); color: var(--ink); padding: 0.25rem 0; }
+    .top nav { display: flex; align-items: center; gap: 0.25rem; }
+    .top nav a { font-size: 0.8125rem; color: var(--muted); padding: 0.4rem 0.55rem; border-radius: 6px; transition: color 150ms var(--ease); }
+    .top nav a:hover { color: var(--ink); }
+    .icon-btn { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: 999px; border: 1px solid var(--line-2); background: transparent; color: var(--ink-2); cursor: pointer; transition: color 150ms var(--ease), border-color 150ms var(--ease), transform 100ms var(--ease); }
+    .icon-btn:hover { color: var(--ink); border-color: var(--muted); }
+    .icon-btn:active { transform: scale(0.94); }
+    @media (max-width: 40rem) { .top nav a { display: none; } }
 
-    /* ---------- Hero: inked evaluation panel ---------- */
-    .hero-band { background: var(--ink); color: var(--paper); border-bottom: 3px solid var(--pass); }
-    .hero { padding: 5rem 0 3.6rem; }
-    .eyebrow {
-      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.16em;
-      color: var(--pass-bright); margin-bottom: 1.3rem; display: flex; align-items: center; gap: 0.7rem;
-    }
-    .eyebrow::before { content: ''; width: 2.2rem; height: 1px; background: var(--pass-bright); }
-    h1 {
-      font-family: 'Archivo', sans-serif; font-weight: 900;
-      font-size: clamp(2.9rem, 8.5vw, 5.6rem);
-      letter-spacing: -0.03em; line-height: 0.98; margin-bottom: 1.6rem;
-      text-transform: uppercase;
-    }
-    h1 .mark { color: var(--pass-bright); }
-    .verdict {
-      font-size: clamp(1.15rem, 2.4vw, 1.45rem); line-height: 1.5; max-width: 44ch;
-      color: #E9EDEA; margin-bottom: 2.8rem;
-      border-left: 3px solid var(--pass-bright); padding-left: 1.2rem;
-    }
-    .verdict strong { font-weight: 600; color: #fff; }
-    .ledger { border-top: 1px solid var(--paper-soft); }
-    .ledger-row {
-      display: grid; grid-template-columns: 10rem 1fr; gap: 1rem;
-      padding: 0.85rem 0; border-bottom: 1px solid var(--hairline-dark); align-items: baseline;
-    }
-    .ledger-row dt {
-      font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.12em;
-      color: var(--pass-bright); display: flex; align-items: center; gap: 0.55rem;
-    }
-    .ledger-row dt::before { content: '■'; font-size: 0.5rem; }
-    .ledger-row dd { font-size: 0.98rem; color: var(--paper-soft); }
-    @media (max-width: 560px) { .ledger-row { grid-template-columns: 1fr; gap: 0.15rem; } }
+    /* ---------- Banner: Dubai sunset to Melbourne dawn ---------- */
+    .banner { margin-top: 1rem; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; position: relative; aspect-ratio: 1000 / 320; background: #142A44; }
+    .banner svg { display: block; width: 100%; height: 100%; }
+    .banner .city { font-family: var(--serif); fill: #FFF6EC; }
+    .banner .tag { font-family: var(--mono); fill: rgba(255, 246, 236, 0.7); letter-spacing: 0.08em; }
+    .route { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem 1.25rem; margin-top: 0.7rem; }
+    .route div { display: grid; gap: 0.2rem; align-content: start; }
+    .route h3 { font: 500 0.6875rem/1.2 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; display: flex; align-items: center; gap: 0.4rem; }
+    .route h3::before { content: ""; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; }
+    .route .dxb h3 { color: var(--dxb); } .route .mel h3 { color: var(--mel); text-align: right; justify-content: flex-end; }
+    .route .mel { text-align: right; }
+    .route ol { list-style: none; padding: 0; font: 400 0.75rem/1.55 var(--mono); color: var(--muted); }
 
-    /* ---------- Sections ---------- */
-    section { padding: 3.6rem 0 1rem; }
-    .sec-head { display: flex; align-items: baseline; gap: 0.9rem; margin-bottom: 0.4rem; }
-    .sec-n { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--pass); letter-spacing: 0.08em; }
-    h2 { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 1.75rem; letter-spacing: -0.015em; text-transform: uppercase; }
-    .section-note { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.09em; color: var(--ink-soft); margin-bottom: 2rem; }
-    .section-note a { color: inherit; }
+    /* ---------- Profile header ---------- */
+    .profile { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 1rem; align-items: center; padding-block: 1.25rem 1.5rem; }
+    .avatar { width: 4.25rem; height: 4.25rem; border-radius: 16px; border: 2px solid transparent; background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(135deg, var(--dxb), var(--mel)) border-box; display: grid; place-items: center; font: 400 1.75rem/1 var(--serif); color: var(--ink); overflow: hidden; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile h1 { font: 400 clamp(2rem, 5vw, 2.6rem)/1 var(--serif); color: var(--ink); letter-spacing: -0.01em; }
+    .profile .role { font: 400 0.8125rem/1.4 var(--mono); color: var(--ink-2); margin-top: 0.35rem; }
+    .meta { display: flex; flex-wrap: wrap; gap: 0.25rem 0.9rem; margin-top: 0.4rem; font: 400 0.75rem/1.4 var(--mono); color: var(--muted); }
+    .meta span { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .dot { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--live); }
+    @media (prefers-reduced-motion: no-preference) { .dot { animation: ping 2.4s var(--ease) infinite; } }
+    @keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--live) 55%, transparent); } 70%, 100% { box-shadow: 0 0 0 6px transparent; } }
+    .kbd-btn { display: inline-flex; align-items: center; gap: 0.4rem; height: 2rem; padding: 0 0.65rem; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); color: var(--muted); font: 400 0.75rem/1 var(--mono); cursor: pointer; transition: color 150ms var(--ease), border-color 150ms var(--ease), transform 100ms var(--ease); }
+    .kbd-btn:hover { color: var(--ink); border-color: var(--muted); }
+    .kbd-btn:active { transform: scale(0.96); }
+    @media (max-width: 34rem) { .profile { grid-template-columns: auto minmax(0, 1fr); } .profile .kbd-btn { display: none; } }
+
+    /* ---------- Section heads ---------- */
+    .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-block: 1.1rem; }
+    .sec-head h2 { font: 400 1.75rem/1.1 var(--serif); color: var(--ink); }
+    .sec-head .aside { font: 400 0.75rem/1.4 var(--mono); color: var(--muted); text-align: right; }
+    .sec-body { padding-block: 1.5rem 2.25rem; }
+
+    /* ---------- About ---------- */
+    .bullets { list-style: none; padding: 0; display: grid; gap: 0.9rem; }
+    .bullets li { position: relative; padding-left: 1.1rem; max-width: 62ch; }
+    .bullets li::before { content: ""; position: absolute; left: 0; top: 0.7em; width: 0.3rem; height: 0.3rem; border-radius: 50%; background: var(--muted); }
+    .bullets strong { color: var(--ink); font-weight: 500; }
+    .ilink { color: var(--ink); border-bottom: 1px solid var(--line-2); transition: border-color 150ms var(--ease); }
+    .ilink:hover { border-color: var(--ink); }
+    .snapshot { margin-top: 1.5rem; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 1rem 1.1rem; }
+    .snapshot h3 { font: 500 0.6875rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; }
+    .snapshot dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem 1.5rem; }
+    .snapshot div { display: grid; gap: 0.1rem; }
+    .snapshot dt { font: 400 0.6875rem/1.3 var(--mono); color: var(--muted); }
+    .snapshot dd { color: var(--ink); font-size: 0.875rem; }
+    @media (max-width: 34rem) { .snapshot dl { grid-template-columns: minmax(0, 1fr); } }
+
+    .links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .pill { display: inline-flex; align-items: center; gap: 0.45rem; height: 2.125rem; padding: 0 0.8rem; border: 1px solid var(--line-2); border-radius: 999px; background: var(--surface); color: var(--ink-2); font: 400 0.8125rem/1 var(--sans); cursor: pointer; transition: color 150ms var(--ease), border-color 150ms var(--ease), transform 100ms var(--ease); }
+    .pill:hover { color: var(--ink); border-color: var(--muted); }
+    .pill:active { transform: scale(0.97); }
+    .pill--solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .pill--solid:hover { color: var(--bg); opacity: 0.9; }
+    .pill .done { display: none; }
+    .pill.is-done .label { display: none; }
+    .pill.is-done .done { display: inline; color: var(--live); }
 
     /* ---------- Projects ---------- */
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
-    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
-    .project {
-      background: var(--card); border: 1px solid var(--hairline); border-radius: 8px;
-      padding: 1.5rem 1.6rem 1.35rem; display: flex; flex-direction: column;
-      position: relative;
-      /* Skill §11: transform and opacity only. box-shadow was in this list before,
-         which forces the browser to repaint a 28px blur every frame of the hover. */
-      transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out), opacity var(--dur-reveal) var(--ease-out);
-    }
-    /* Skill §11: hint only where motion is actually imminent. Scoped to pointer
-       devices so touch users don't pay for six permanently promoted layers. */
-    @media (hover: hover) { .project, .gh-card { will-change: transform; } }
-    /* The lift shadow lives on a pseudo-element so it can cross-fade on the
-       compositor instead of being repainted (skill §11). Absolutely positioned so
-       it never becomes a flex item of the card. */
-    .project::after {
-      content: ''; position: absolute; inset: 0; border-radius: 8px;
-      box-shadow: 0 10px 28px -14px rgba(19,29,25,0.35);
-      opacity: 0; transition: opacity var(--dur-base) var(--ease-out);
-      pointer-events: none;
-    }
-    @media (hover: hover) {
-      .project:hover { transform: translateY(-3px); border-color: var(--pass); }
-      .project:hover::after { opacity: 1; }
-    }
-    /* Skill §1: the card is the primary interactive object on the page — it has to
-       answer the finger. Slightly under the 0.97 default because the card is large;
-       the same scale reads as more movement on a bigger surface. */
-    .project:active { transform: scale(0.985); border-color: var(--pass); }
-    @media (prefers-reduced-motion: reduce) {
-      .project, .project:hover, .project:active { transform: none; transition: none; }
-      .project::after { transition: none; }
-    }
-    .project-head { display: flex; justify-content: space-between; gap: 0.8rem; align-items: baseline; flex-wrap: wrap; margin-bottom: 0.3rem; }
-    .project h3 { font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; }
-    .status { font-family: 'IBM Plex Mono', monospace; font-size: 0.64rem; letter-spacing: 0.11em; padding: 0.24rem 0.55rem; border-radius: 3px; white-space: nowrap; }
-    .status.shipped { color: var(--pass); border: 1px solid var(--pass); background: rgba(30,122,90,0.07); }
-    .status.in-build { color: var(--amber); border: 1px solid var(--amber); background: rgba(169,109,0,0.07); }
-    .tagline { font-style: italic; color: var(--ink-soft); font-size: 0.95rem; margin-bottom: 0.65rem; }
-    .project p.desc { font-size: 0.95rem; margin-bottom: 1rem; flex-grow: 1; }
-    .meta { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
-    .chip { font-family: 'IBM Plex Mono', monospace; font-size: 0.64rem; letter-spacing: 0.05em; color: var(--ink-soft); background: var(--paper); border: 1px solid var(--hairline); border-radius: 3px; padding: 0.16rem 0.48rem; }
-    .chip.signal { color: var(--pass); border-color: var(--pass); }
-    .meta a {
-      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--ink);
-      text-decoration: underline; text-underline-offset: 3px; margin-left: auto;
-      padding: 0.3rem 0.2rem; display: inline-block; /* skill §10: hit padding */
-      transition: color var(--dur-press) var(--ease-out), transform var(--dur-press) var(--ease-out);
-    }
-    .meta a:focus-visible { color: var(--pass); }
-    @media (hover: hover) { .meta a:hover { color: var(--pass); } }
-    .meta a:active { color: var(--pass); transform: scale(0.94); }
+    .filters { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1.1rem; }
+    .filters button { font: 400 0.75rem/1 var(--mono); color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 0.45rem 0.75rem; cursor: pointer; transition: color 150ms var(--ease), border-color 150ms var(--ease), background-color 150ms var(--ease); }
+    .filters button:hover { color: var(--ink); }
+    .filters button[aria-pressed="true"] { color: var(--ink); background: var(--surface-2); border-color: var(--line-2); }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; }
+    @media (max-width: 40rem) { .cards { grid-template-columns: minmax(0, 1fr); } }
+    .card { --c: var(--ink); border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 0.7rem; display: flex; flex-direction: column; transition: border-color 200ms var(--ease); position: relative; }
+    .card:hover { border-color: color-mix(in oklab, var(--c) 45%, var(--line-2)); }
+    .card .preview { background: radial-gradient(120% 90% at 100% 0%, color-mix(in oklab, var(--c) 16%, transparent), transparent 60%), var(--bg) repeating-linear-gradient(-45deg, var(--hatch) 0 1px, transparent 1px 9px); }
+    .card-title { display: flex; align-items: center; gap: 0.6rem; }
+    .tile-icon { width: 2rem; height: 2rem; flex: none; border-radius: 9px; display: grid; place-items: center; color: #fff; background: linear-gradient(145deg, color-mix(in oklab, var(--c) 92%, #fff), color-mix(in oklab, var(--c) 70%, #000)); box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 4px 12px -4px color-mix(in oklab, var(--c) 60%, transparent); }
+    .tile-icon svg { width: 1rem; height: 1rem; }
+    .card[hidden] { display: none; }
+    .card--wide { grid-column: 1 / -1; }
+    .preview { position: relative; border: 1px solid var(--line); border-radius: 10px; min-height: 11.5rem; padding: 2.4rem 0.9rem 0.9rem; background: var(--bg) repeating-linear-gradient(-45deg, var(--hatch) 0 1px, transparent 1px 9px); overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+    .badges { position: absolute; top: 0.6rem; left: 0.6rem; right: 0.6rem; display: flex; justify-content: space-between; gap: 0.5rem; }
+    .badge { display: inline-flex; align-items: center; gap: 0.35rem; height: 1.35rem; padding: 0 0.45rem; border-radius: 5px; font: 500 0.625rem/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid; }
+    .badge--live { color: var(--live); background: var(--live-soft); border-color: color-mix(in oklab, var(--live) 35%, transparent); }
+    .badge--live::before { content: ""; width: 0.35rem; height: 0.35rem; border-radius: 50%; background: currentColor; }
+    .badge--wip { color: var(--warm); background: var(--warm-soft); border-color: color-mix(in oklab, var(--warm) 35%, transparent); }
+    .badge--data { color: var(--muted); background: var(--surface); border-color: var(--line-2); }
+    .card-body { padding: 0.9rem 0.35rem 0.25rem; display: flex; flex-direction: column; gap: 0.45rem; flex: 1; }
+    .card-body h3 { font: 500 1rem/1.3 var(--sans); color: var(--ink); }
+    .card-body p { font-size: 0.875rem; }
+    .eng summary { cursor: pointer; list-style: none; font: 400 0.75rem/1 var(--mono); color: var(--muted); display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0; transition: color 150ms var(--ease); }
+    .eng summary::-webkit-details-marker { display: none; }
+    .eng summary:hover { color: var(--ink); }
+    .eng summary::after { content: "+"; transition: transform 200ms var(--ease); display: inline-block; }
+    .eng[open] summary::after { transform: rotate(45deg); }
+    .eng p { margin-top: 0.4rem; font-size: 0.8125rem; }
+    .card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 0.75rem; margin-top: auto; padding-top: 0.75rem; border-top: 1px solid var(--line); }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+    .chip { font: 400 0.6875rem/1 var(--mono); color: var(--ink-2); border: 1px solid var(--line-2); border-radius: 5px; padding: 0.3rem 0.45rem; background: var(--bg); }
+    .card-foot .icon-btn { width: 1.9rem; height: 1.9rem; flex: none; }
+
+    .seg { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.7rem; }
+    .seg button { font: 400 0.6875rem/1 var(--mono); color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 0.35rem 0.5rem; cursor: pointer; transition: color 150ms var(--ease), border-color 150ms var(--ease), transform 100ms var(--ease); }
+    .seg button:hover { color: var(--ink); }
+    .seg button:active { transform: scale(0.95); }
+    .seg button[aria-pressed="true"] { color: var(--ink); border-color: var(--muted); }
+    .ex-read { font: 400 0.6875rem/1.3 var(--mono); color: var(--muted); margin-bottom: 0.5rem; }
+    .ex-read b { color: var(--ink); font-weight: 500; }
+    .bars { list-style: none; padding: 0; display: grid; gap: 0.32rem; }
+    .bars li { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr) 2.4rem; align-items: center; gap: 0.6rem; font: 400 0.75rem/1.2 var(--mono); }
+    .bars .k { color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bars .track { height: 0.45rem; border-radius: 99px; background: var(--line); overflow: hidden; }
+    .bars .fill { display: block; height: 100%; border-radius: 99px; background: var(--c-jobs); transform-origin: left; transform: scaleX(var(--v, 0)); transition: transform 520ms var(--ease); transition-delay: calc(var(--i, 0) * 30ms); }
+    .bars .n { text-align: right; color: var(--muted); }
+    .ex-note { margin-top: 0.6rem; font: 400 0.625rem/1.45 var(--mono); color: var(--muted); }
+
+    .dotplot { list-style: none; padding: 0; display: grid; gap: 0.2rem; }
+    .dotplot li { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) 2rem; align-items: center; gap: 0.5rem; font: 400 0.6875rem/1.2 var(--mono); }
+    .dotplot .k { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dotplot .axis { position: relative; height: 0.85rem; background: linear-gradient(var(--line-2), var(--line-2)) center / 100% 1px no-repeat; }
+    .dotplot .pt { position: absolute; top: 50%; left: var(--x); width: 0.5rem; height: 0.5rem; margin: -0.25rem 0 0 -0.25rem; border-radius: 50%; background: var(--ink); }
+    .dotplot .pt { background: color-mix(in oklab, var(--c-beats) 55%, var(--ink)); }
+    .dotplot li:first-child .pt { background: var(--c-beats); }
+    .dotplot .n { text-align: right; color: var(--ink); }
+    .scale { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) 2rem; gap: 0.5rem; font: 400 0.625rem/1 var(--mono); color: var(--muted); margin-top: 0.35rem; }
+    .scale span:nth-child(2) { display: flex; justify-content: space-between; }
+
+    .flow { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
+    .flow--row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .flow li { border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); padding: 0.5rem 0.6rem; display: grid; gap: 0.15rem; }
+    .flow .s { font: 400 0.625rem/1 var(--mono); color: var(--muted); }
+    .flow strong { font: 500 0.8125rem/1.2 var(--sans); color: var(--ink); }
+    .flow span:last-child { font: 400 0.6875rem/1.35 var(--mono); color: var(--muted); }
+    .flow li.out { border-color: color-mix(in oklab, var(--c-runway) 50%, var(--line-2)); background: color-mix(in oklab, var(--c-runway) 12%, transparent); }
+    @media (max-width: 34rem) { .flow--row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
     /* ---------- Experience ---------- */
-    .job { border-top: 1px solid var(--hairline); padding: 1.5rem 0; position: relative; }
-    .job:first-of-type { border-top: 2px solid var(--ink); }
-    .job-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: baseline; }
-    .job h3 { font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 1.08rem; }
-    .job .period { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--pass); }
-    .job .place { font-size: 0.9rem; color: var(--ink-soft); font-style: italic; margin-bottom: 0.6rem; }
-    .job ul { padding-left: 1.1rem; }
-    .job li { font-size: 0.96rem; color: var(--ink-soft); margin-bottom: 0.3rem; }
+    .jobs { list-style: none; padding: 0; display: grid; }
+    .job { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); gap: 0.9rem; padding-block: 1.1rem; border-bottom: 1px dashed var(--line-2); }
+    .job:first-child { padding-top: 0; }
+    .job:last-child { border-bottom: 0; padding-bottom: 0; }
+    .mark { width: 2.6rem; height: 2.6rem; border-radius: 10px; display: grid; place-items: center; font: 400 1.2rem/1 var(--serif); color: var(--city); background: color-mix(in oklab, var(--city) 13%, var(--surface)); border: 1px solid color-mix(in oklab, var(--city) 40%, var(--line-2)); }
+    .job.dxb { --city: var(--dxb); } .job.mel { --city: var(--mel); }
+    .when-wrap { display: grid; justify-items: end; gap: 0.3rem; }
+    .dur { font: 500 0.6875rem/1 var(--mono); color: var(--city); background: color-mix(in oklab, var(--city) 12%, transparent); border: 1px solid color-mix(in oklab, var(--city) 35%, transparent); border-radius: 999px; padding: 0.25rem 0.5rem; white-space: nowrap; }
+    .job .city-name { color: var(--city); }
+    .job-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
+    .job h3 { font: 500 0.9375rem/1.35 var(--sans); color: var(--ink); }
+    .job h3 span { color: var(--muted); font-weight: 400; }
+    .job .when { font: 400 0.75rem/1 var(--mono); color: var(--muted); white-space: nowrap; }
+    .job .where { font: 400 0.75rem/1.4 var(--mono); color: var(--muted); margin-top: 0.2rem; }
+    .job ul { margin-top: 0.6rem; padding-left: 1rem; display: grid; gap: 0.3rem; font-size: 0.875rem; }
+    .job li::marker { color: var(--line-2); }
 
-    /* ---------- Lists (pubs, certs) ---------- */
-    .rule-list { list-style: none; padding: 0; }
-    .rule-list li { border-bottom: 1px solid var(--hairline); padding: 0.7rem 0; font-size: 0.96rem; color: var(--ink-soft); }
-    .rule-list li strong { color: var(--ink); }
-    .empty { border: 1px dashed var(--hairline); border-radius: 8px; padding: 1.4rem 1.6rem; color: var(--ink-soft); font-size: 0.96rem; background: rgba(255,255,255,0.55); }
-    .empty a { color: var(--ink); }
-    .gh-card {
-      display: block; background: var(--card); border: 1px solid var(--hairline); border-radius: 8px;
-      padding: 1.5rem 1.6rem 1.2rem; text-decoration: none; position: relative;
-      transition: border-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
-    }
-    /* Same compositor treatment as .project (skill §11) — shadow cross-fades on a
-       pseudo-element rather than repainting a blur on every frame. */
-    .gh-card::after {
-      content: ''; position: absolute; inset: 0; border-radius: 8px;
-      box-shadow: 0 10px 28px -14px rgba(19,29,25,0.35);
-      opacity: 0; transition: opacity var(--dur-base) var(--ease-out);
-      pointer-events: none;
-    }
-    .gh-card:focus-visible { border-color: var(--pass); }
-    .gh-card:focus-visible::after { opacity: 1; }
-    @media (hover: hover) {
-      .gh-card:hover { border-color: var(--pass); }
-      .gh-card:hover::after { opacity: 1; }
-    }
-    .gh-card:active { border-color: var(--pass); transform: scale(0.99); }
-    @media (prefers-reduced-motion: reduce) {
-      .gh-card, .gh-card:active { transform: none; transition: none; }
-      .gh-card::after { transition: none; }
-    }
-    .gh-card img { width: 100%; height: auto; display: block; }
-    .gh-foot { display: block; margin-top: 0.9rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.74rem; letter-spacing: 0.05em; color: var(--pass); }
+    /* ---------- Now ---------- */
+    .now { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+    .now li { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 0.9rem 1rem; display: grid; gap: 0.35rem; align-content: start; position: relative; overflow: hidden; }
+    .now li::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 2px; background: var(--k); }
+    .now .k { font: 500 0.6875rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--k); }
+    .now .v { font-size: 0.875rem; color: var(--ink); }
+    @media (max-width: 40rem) { .now { grid-template-columns: minmax(0, 1fr); } }
 
-    /* ---------- GitHub stats ---------- */
-    .stats { margin-bottom: 1.8rem; }
-    /* Skill §15: small mono caps take positive tracking. Same treatment as the
-       other labels on the page, so this reads as part of the system. */
-    .stat-l { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.11em; color: var(--ink-soft); }
+    /* ---------- Research ---------- */
+    .papers { list-style: none; padding: 0; display: grid; gap: 0.6rem; }
+    .paper { display: block; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 0.9rem 1rem; transition: border-color 200ms var(--ease); }
+    a.paper:hover { border-color: var(--line-2); }
+    .paper-top { display: flex; justify-content: space-between; gap: 1rem; font: 400 0.6875rem/1.3 var(--mono); color: var(--muted); }
+    .paper h3 { margin-top: 0.4rem; font: 500 0.9375rem/1.4 var(--sans); color: var(--ink); }
+    .paper p { margin-top: 0.3rem; font-size: 0.8125rem; }
+    .certs { margin-top: 1.4rem; }
+    .certs h3 { font: 500 0.6875rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; }
+    .certs ul { list-style: none; padding: 0; }
+    .certs li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.55rem 0; border-bottom: 1px dashed var(--line-2); font-size: 0.875rem; }
+    .certs li:last-child { border-bottom: 0; }
+    .certs li span:first-child { color: var(--ink); }
+    .certs li span:last-child { font: 400 0.75rem/1.5 var(--mono); color: var(--muted); white-space: nowrap; }
 
-    .mix { margin-top: 0.9rem; }
-    .mix-row { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.9rem; align-items: center; padding: 0.32rem 0; }
-    .mix-row dt {
-      font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; letter-spacing: 0.09em;
-      color: var(--ink-soft);
-    }
-    .mix-row dd { display: flex; align-items: center; gap: 0.7rem; margin: 0; }
-    .mix-bar {
-      flex: 1; height: 6px; border-radius: 3px;
-      background: var(--hairline); position: relative; overflow: hidden;
-    }
-    /* The fill is a transform-scaled pseudo-element rather than an animated
-       width, so if this is ever animated it stays on the compositor (skill §11). */
-    .mix-bar::before {
-      content: ''; position: absolute; inset: 0;
-      background: var(--pass); border-radius: 3px;
-      transform-origin: left; transform: scaleX(var(--pct));
-    }
-    .mix-pct {
-      font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--ink);
-      min-width: 2.6rem; text-align: right; font-variant-numeric: tabular-nums;
-    }
-    @media (max-width: 460px) {
-      .mix-row { grid-template-columns: 1fr; gap: 0.25rem; }
-    }
+    /* ---------- GitHub ---------- */
+    .gh { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 1rem; }
+    .gh-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 0.8rem; font: 400 0.75rem/1.3 var(--mono); color: var(--muted); }
+    .gh-top b { color: var(--ink); font-weight: 500; }
+    .graph-svg { display: block; width: 100%; height: auto; }
+    .repos { list-style: none; padding: 0; margin-top: 0.9rem; border-top: 1px solid var(--line); }
+    .repos li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px dashed var(--line-2); font: 400 0.75rem/1.4 var(--mono); }
+    .repos li:last-child { border-bottom: 0; }
+    .repos a { color: var(--ink); }
+    .repos a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .repos span { color: var(--muted); }
 
-    .stat-more {
-      font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; letter-spacing: 0.09em;
-      color: var(--ink-soft); margin-top: 0.7rem;
-    }
+    /* ---------- Contact ---------- */
+    .cta { text-align: center; padding-block: 2.5rem 2.75rem; }
+    .cta h2 { font: 400 clamp(2rem, 6vw, 2.75rem)/1.05 var(--serif); color: var(--ink); }
+    .cta p { margin: 0.7rem auto 1.4rem; max-width: 44ch; }
+    .cta .links { justify-content: center; }
+    footer .inner { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-block: 1.1rem 1.6rem; font: 400 0.6875rem/1.4 var(--mono); color: var(--muted); }
 
-    .top-repos { list-style: none; padding: 0; margin-top: 1.2rem; border-top: 1px solid var(--hairline); }
-    .top-repos li {
-      display: flex; align-items: baseline; gap: 0.8rem;
-      padding: 0.6rem 0; border-bottom: 1px solid var(--hairline);
-      font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem;
-    }
-    .top-repos .rank { color: var(--pass); letter-spacing: 0.08em; }
-    .top-repos a {
-      color: var(--ink); text-decoration: underline; text-underline-offset: 3px;
-      padding: 0.2rem 0.15rem; /* skill §10: hit padding */
-      transition: color var(--dur-press) var(--ease-out), transform var(--dur-press) var(--ease-out);
-    }
-    .top-repos a:focus-visible { color: var(--pass); }
-    @media (hover: hover) { .top-repos a:hover { color: var(--pass); } }
-    .top-repos a:active { color: var(--pass); transform: scale(0.96); }
-    .top-repos .repo-commits { margin-left: auto; color: var(--ink-soft); letter-spacing: 0.05em; white-space: nowrap; }
-    @media (max-width: 460px) {
-      .top-repos li { flex-wrap: wrap; gap: 0.4rem; }
-      .top-repos .repo-commits { margin-left: 0; width: 100%; }
-    }
+    /* ---------- Sticky index ---------- */
+    .index { position: fixed; top: 7.5rem; left: calc(50% + var(--col) / 2 + 2.5rem); display: none; z-index: 5; }
+    @media (min-width: 76rem) { .index { display: block; } }
+    .index h2 { font: 500 0.625rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.9rem; }
+    .index ol { list-style: none; padding: 0; display: grid; gap: 0.15rem; }
+    .index a { display: flex; align-items: center; gap: 0.55rem; font: 400 0.75rem/1 var(--mono); color: var(--muted); padding: 0.4rem 0; transition: color 200ms var(--ease); }
+    .index a::before { content: ""; width: 0; height: 1px; background: var(--ink); transition: width 250ms var(--ease); }
+    .index a:hover { color: var(--ink-2); }
+    .index a[aria-current="true"] { color: var(--ink); }
+    .index a[aria-current="true"]::before { width: 0.9rem; }
 
-    /* ---------- Contact + footer ---------- */
-    .contact-links { display: flex; gap: 1.6rem; flex-wrap: wrap; margin-top: 0.8rem; }
-    .contact-links a {
-      font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: var(--ink);
-      text-decoration: underline; text-underline-offset: 3px;
-      padding: 0.3rem 0.2rem; display: inline-block; /* skill §10: hit padding */
-      transition: color var(--dur-press) var(--ease-out), transform var(--dur-press) var(--ease-out);
-    }
-    .contact-links a:focus-visible { color: var(--pass); }
-    @media (hover: hover) { .contact-links a:hover { color: var(--pass); } }
-    .contact-links a:active { color: var(--pass); transform: scale(0.95); }
-    footer { background: var(--ink); color: var(--paper-soft); margin-top: 4.5rem; padding: 1.5rem 0 2.2rem; border-top: 3px solid var(--pass); }
-    footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem; }
-    footer span { font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; letter-spacing: 0.09em; }
+    /* ---------- Command palette ---------- */
+    dialog.pal { width: min(34rem, calc(100% - 2rem)); margin: 14vh auto auto; padding: 0; border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); color: var(--ink-2); box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.5); }
+    dialog.pal::backdrop { background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(2px); }
+    dialog.pal[open] { animation: pop 170ms var(--ease); transform-origin: top center; }
+    @keyframes pop { from { opacity: 0; transform: scale(0.97) translateY(-4px); } to { opacity: 1; transform: none; } }
+    .pal input { width: 100%; font: 400 0.9375rem/1.4 var(--sans); color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 0.95rem 1.1rem; }
+    .pal input:focus-visible { outline: none; }
+    .pal ul { list-style: none; padding: 0.4rem; margin: 0; max-height: 21rem; overflow-y: auto; }
+    .pal li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0.75rem; border-radius: 8px; cursor: pointer; font-size: 0.875rem; }
+    .pal li[hidden] { display: none; }
+    .pal li .g { font: 400 0.6875rem/1.6 var(--mono); color: var(--muted); }
+    .pal li[aria-selected="true"] { background: var(--surface-2); color: var(--ink); }
+    .pal .empty { padding: 0.9rem 1.1rem; font-size: 0.875rem; }
 
-    a:focus-visible { outline: 2px solid var(--pass); outline-offset: 2px; }
-
-    /* ---------- Skill §14: the other two accessibility signals ----------
-       prefers-reduced-motion was already handled. These two were not, and the
-       transparency one is now load-bearing since the topbar became genuinely
-       see-through. Reduced transparency means frostier/solid, not "no chrome". */
-    @media (prefers-reduced-transparency: reduce) {
-      .topbar {
-        background: var(--ink);
-        backdrop-filter: none; -webkit-backdrop-filter: none;
-        border-bottom: 1px solid var(--hairline-dark);
-      }
-      .topbar::after { display: none; }
-      .empty { background: var(--card); }
-    }
-
-    /* Skill §14: near-solid backgrounds with defined, contrasting borders. */
-    @media (prefers-contrast: more) {
-      .topbar {
-        background: #000;
-        backdrop-filter: none; -webkit-backdrop-filter: none;
-        border-bottom: 1px solid var(--paper-soft);
-      }
-      .topbar::after { display: none; }
-      .topbar .brand, .topbar nav a { color: #fff; }
-      .project, .gh-card { border-color: var(--ink); }
-      .chip { border-color: var(--ink-soft); color: var(--ink); }
-      .tagline, .job li, .rule-list li, .section-note { color: var(--ink); }
-      a:focus-visible { outline-width: 3px; }
-    }
-
-    /* ---------- Reveal on scroll ----------
-       The hidden state is gated behind html.js, which is set by a one-line script
-       in <head>. Previously .reveal defaulted to opacity:0 unconditionally, so if
-       the inline reveal script threw for any reason other than a missing
-       IntersectionObserver, every section on the page stayed invisible. Content
-       must never depend on JS succeeding. */
-    html.js .reveal { opacity: 0; transform: translateY(14px); transition: opacity var(--dur-reveal) var(--ease-out), transform var(--dur-reveal) var(--ease-out); }
-    html.js .reveal.in { opacity: 1; transform: none; }
-
-    /* Skill §16.7: cards arrive in sequence rather than as one slab. The stagger is
-       applied in JS rather than via transition-delay, because a CSS delay would
-       persist after the reveal and lag every subsequent hover by the same amount. */
-    html.js .reveal .project { opacity: 0; transform: translateY(10px); }
-    html.js .reveal .project.shown { opacity: 1; transform: none; }
-
-    @media (prefers-reduced-motion: reduce) {
-      html.js .reveal, html.js .reveal .project {
-        opacity: 1; transform: none; transition: none;
-      }
-    }
-
+    /* ---------- Entrance: blur-fade, staggered ---------- */
     @media (prefers-reduced-motion: no-preference) {
-      .hero > * { animation: rise 0.55s ease both; }
-      .hero > *:nth-child(2) { animation-delay: 0.07s; }
-      .hero > *:nth-child(3) { animation-delay: 0.14s; }
-      .hero > *:nth-child(4) { animation-delay: 0.21s; }
-      @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+      html.js .enter { opacity: 0; filter: blur(6px); transform: translateY(8px); }
+      html.js.ready .enter { opacity: 1; filter: none; transform: none; transition: opacity 600ms var(--ease), filter 600ms var(--ease), transform 600ms var(--ease); transition-delay: calc(var(--d, 0) * 70ms); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .bars .fill, .index a::before { transition: none; }
+      dialog.pal[open] { animation: none; }
     }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="wrap">
-      <span class="brand"><span class="dot" aria-hidden="true"></span>YOUSUF AGHA · <span class="open">OPEN TO WORK</span> · MELBOURNE</span>
-      <nav aria-label="Sections">
-        <a href="#projects">PROJECTS</a>
-        <a href="#experience">EXPERIENCE</a>
-        <a href="#publications">PUBLICATIONS</a>
-        <a href="#activity">ACTIVITY</a>
-        <a href="#contact">CONTACT</a>
+  <header class="top">
+    <div class="col inner">
+      <a class="brand" href="#top" id="top">{profile.name.split(' ')[0]}</a>
+      <nav aria-label="Primary">
+        <a href="#work">Projects</a>
+        <a href="#experience">Experience</a>
+        <a href="#contact">Contact</a>
+        <button class="icon-btn" type="button" data-open-palette aria-label="Search the site" set:html={icon.search}></button>
+        <button class="icon-btn" type="button" id="theme" aria-label="Switch light or dark" set:html={icon.sun}></button>
       </nav>
     </div>
   </header>
 
-  <div class="hero-band">
-    <div class="hero wrap">
-      <p class="eyebrow">SHIPPED LLM WORK, END TO END</p>
-      <h1>Yousuf<br />Agha<span class="mark">.</span></h1>
-      <p class="verdict"><strong>{profile.role}.</strong><br />{profile.verdict}</p>
-      <dl class="ledger">
-        {profile.evidence.map((e) => (
-          <div class="ledger-row">
-            <dt>{e.label}</dt>
-            <dd>{e.value}</dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  </div>
+  <aside class="index" aria-label="On this page">
+    <h2>Index</h2>
+    <ol>{sections.map(([id, label]) => <li><a href={`#${id}`} data-index={id}>{label}</a></li>)}</ol>
+  </aside>
 
-  <main>
-    <section id="projects" class="wrap reveal">
-      <div class="sec-head"><span class="sec-n">01 /</span><h2>Projects</h2></div>
-      <p class="section-note">STATUS LABELS ARE HONEST — NOTHING LISTED THAT CAN'T BE DEFENDED IN AN INTERVIEW</p>
-      <div class="grid">
-        {projects.map((p) => (
-          <article class="project">
-            <div class="project-head">
-              <h3>{p.name}</h3>
-              <span class={`status ${p.status}`}>{statusLabel[p.status]}</span>
-            </div>
-            <p class="tagline">{p.tagline}</p>
-            <p class="desc">{p.description}</p>
-            <div class="meta">
-              {p.signals.map((s) => <span class="chip signal">{s}</span>)}
-              {p.stack.map((t) => <span class="chip">{t}</span>)}
-              {p.repo && <a href={p.repo}>repo →</a>}
-              {p.demo && <a href={p.demo}>demo →</a>}
-            </div>
-          </article>
-        ))}
+  <main class="frame">
+    <div class="col inner">
+      <figure class="banner enter" style="--d:0" aria-labelledby="journey-cap">
+        <svg viewBox="0 0 1000 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <linearGradient id="sky" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stop-color="#E9774F" /><stop offset="0.3" stop-color="#8A4256" /><stop offset="0.55" stop-color="#1B2B48" /><stop offset="0.8" stop-color="#1F4573" /><stop offset="1" stop-color="#4F86BD" />
+            </linearGradient>
+            <linearGradient id="shade" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0B1020" stop-opacity="0.55" /><stop offset="0.7" stop-color="#0B1020" stop-opacity="0" /></linearGradient>
+            <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#FFE2A8" /><stop offset="0.45" stop-color="#FFB46B" stop-opacity="0.85" /><stop offset="1" stop-color="#FF8A5B" stop-opacity="0" /></radialGradient>
+            <radialGradient id="dawn" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#CFE6FF" stop-opacity="0.9" /><stop offset="1" stop-color="#7CB8FF" stop-opacity="0" /></radialGradient>
+            <path id="route" d="M190 238 Q 500 -10 812 238" />
+          </defs>
+          <rect width="1000" height="320" fill="url(#sky)" />
+          <rect width="1000" height="320" fill="url(#shade)" />
+          {stars.map((t) => <circle cx={t.x.toFixed(1)} cy={t.y.toFixed(1)} r={t.r.toFixed(2)} fill="#fff" opacity={t.o.toFixed(2)} />)}
+          <circle cx="150" cy="292" r="120" fill="url(#sun)" />
+          <circle cx="880" cy="300" r="110" fill="url(#dawn)" />
+          <use href="#route" fill="none" stroke="#FFF6EC" stroke-opacity="0.45" stroke-width="1.6" stroke-dasharray="2 7" stroke-linecap="round" />
+          <g fill="#0C1322">
+            {dxb.map((b) => <rect x={b.x.toFixed(1)} y={(300 - b.h).toFixed(1)} width={b.w.toFixed(1)} height={b.h.toFixed(1)} rx="1.5" />)}
+            <path d="M238 300 L238 150 L243 150 L243 112 L247 112 L247 78 L250 78 L250 40 L252 14 L254 40 L254 78 L257 78 L257 112 L261 112 L261 150 L266 150 L266 300 Z" />
+            {mel.map((b) => <rect x={b.x.toFixed(1)} y={(300 - b.h).toFixed(1)} width={b.w.toFixed(1)} height={b.h.toFixed(1)} rx="1.5" />)}
+            <path d="M716 300 L716 110 L722 102 L742 102 L748 110 L748 300 Z" />
+            <rect x="0" y="298" width="1000" height="22" />
+          </g>
+          <rect x="718" y="102" width="28" height="10" fill="#F5C76A" opacity="0.9" />
+          <g fill="#FFD58A">{lights.map((l) => <rect x={l.x.toFixed(1)} y={l.y.toFixed(1)} width="2.2" height="2.2" opacity="0.75" />)}</g>
+          <circle cx="190" cy="238" r="5" fill="#FF8A5B" stroke="#FFF6EC" stroke-width="2" />
+          <circle cx="812" cy="238" r="5" fill="#7CB8FF" stroke="#FFF6EC" stroke-width="2" />
+          <g id="plane">
+            <path d="M-11 0 L9 0 M3 -7 L-3 0 L3 7 M-9 -3.5 L-11 0 L-9 3.5" fill="none" stroke="#FFF6EC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+            <animateMotion dur="11s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1;0;0" keyTimes="0;0.42;0.5;0.92;1" calcMode="spline" keySplines="0.45 0 0.55 1;0 0 1 1;0.45 0 0.55 1;0 0 1 1"><mpath href="#route" /></animateMotion>
+          </g>
+          <text class="city" x="44" y="62" font-size="40">Dubai</text>
+          <text class="tag" x="46" y="86" font-size="12">25.2°N  HOME</text>
+          <text class="city" x="956" y="62" font-size="40" text-anchor="end">Melbourne</text>
+          <text class="tag" x="954" y="86" font-size="12" text-anchor="end">37.8°S  STUDY AND WORK</text>
+        </svg>
+      </figure>
+      <div class="route enter" style="--d:1" id="journey-cap">
+        <div class="dxb"><h3>Dubai</h3><ol>{profile.journey.Dubai.map((t) => <li>{t}</li>)}</ol></div>
+        <div class="mel"><h3>Melbourne</h3><ol>{profile.journey.Melbourne.map((t) => <li>{t}</li>)}</ol></div>
+      </div>
+
+      <div class="profile">
+        <div class="avatar enter" style="--d:2" aria-hidden="true">{profile.photo ? <img src={profile.photo} alt="" /> : initials}</div>
+        <div class="enter" style="--d:3">
+          <h1>{profile.name}</h1>
+          <p class="role">{profile.role}</p>
+          <p class="meta">
+            <span>Dubai, UAE</span>
+            <span id="clock">GST</span>
+            <span><i class="dot" aria-hidden="true"></i>Open to work</span>
+          </p>
+        </div>
+        <button class="kbd-btn enter" style="--d:4" type="button" data-open-palette><span set:html={icon.search} /> ⌘K</button>
+      </div>
+    </div>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <section id="about" aria-labelledby="about-h">
+      <div class="col inner sec-head"><h2 id="about-h">About</h2></div>
+      <div class="rule"></div>
+      <div class="col inner sec-body">
+        <ul class="bullets">
+          <li>I'm based in Dubai and I build with LLMs and data. At <strong>Raen AI</strong> I shipped LLM proofs of concept for education and insurance clients, fine-tuning GPT models and taking each one from a business goal to a working prototype.</li>
+          <li>I've also worked close to the business: dashboards, CRM pipelines and client requirements as a Systems Analyst at <strong>Remunera</strong>, and data validation at scale at <strong>Lock and Stock</strong>.</li>
+          <li>I publish too. My latest is a <a class="ilink" href={profile.publications[0].url}>2026 book chapter</a> on generative AI in dark web policing, alongside two IEEE conference papers.</li>
+        </ul>
+        <div class="snapshot">
+          <h3>At a glance</h3>
+          <dl>{profile.glance.map((g) => <div><dt>{g.label}</dt><dd>{g.value}</dd></div>)}<div><dt>Open to</dt><dd>Roles in the UAE and remote</dd></div></dl>
+        </div>
+        <div class="links" style="margin-top:1.25rem">
+          <button class="pill pill--solid" type="button" data-copy="email" data-value={profile.contact.email}><span set:html={icon.mail} /><span class="label">Copy email</span><span class="done">Copied</span></button>
+          <button class="pill" type="button" data-copy="prompt" data-value={prompt} title="Copies a prompt that points your AI assistant at my llms.txt"><span set:html={icon.spark} /><span class="label">Ask your AI about me</span><span class="done">Prompt copied</span></button>
+          <a class="pill" href={profile.contact.github}><span set:html={icon.github} />GitHub</a>
+          <a class="pill" href={profile.contact.linkedin}><span set:html={icon.linkedin} />LinkedIn</a>
+          <a class="pill" href={profile.scholar}><span set:html={icon.scholar} />Scholar</a>
+        </div>
       </div>
     </section>
 
-    <section id="experience" class="wrap reveal">
-      <div class="sec-head"><span class="sec-n">02 /</span><h2>Experience</h2></div>
-      <p class="section-note">THREE ROLES, TWO COUNTRIES, ONE THROUGH-LINE: DATA TO DECISIONS</p>
-      {profile.experience.map((j) => (
-        <article class="job">
-          <div class="job-head">
-            <h3>{j.role} · {j.org}</h3>
-            <span class="period">{j.period}</span>
-          </div>
-          <p class="place">{j.place}</p>
-          <ul>
-            {j.points.map((pt) => <li>{pt}</li>)}
-          </ul>
-        </article>
-      ))}
+    <div class="band" aria-hidden="true"></div>
+
+    <section id="now" aria-labelledby="now-h">
+      <div class="col inner sec-head"><h2 id="now-h">Now</h2><span class="aside">November 2026</span></div>
+      <div class="rule"></div>
+      <div class="col inner sec-body">
+        <ul class="now">
+          {profile.now.map((n, i) => <li style={`--k:${['var(--dxb)', 'var(--mel)', 'var(--live)'][i % 3]}`}><span class="k">{n.k}</span><span class="v">{n.v}</span></li>)}
+        </ul>
+      </div>
     </section>
 
-    <section id="publications" class="wrap reveal">
-      <div class="sec-head"><span class="sec-n">03 /</span><h2>Publications</h2></div>
-      <p class="section-note">PEER-REVIEWED — FULL PROFILE ON <a href={profile.scholar}>GOOGLE SCHOLAR</a></p>
-      <ul class="rule-list">
-        {profile.publications.map((pub) => (
-          <li><strong>{pub.title}</strong> — {pub.authors}. <em>{pub.venue}</em>, {pub.year}.</li>
-        ))}
-      </ul>
-    </section>
+    <div class="band" aria-hidden="true"></div>
 
-    <section id="certifications" class="wrap reveal">
-      <div class="sec-head"><span class="sec-n">04 /</span><h2>Certifications</h2></div>
-      <ul class="rule-list">
-        {profile.certifications.map((c) => <li>{c}</li>)}
-      </ul>
-    </section>
-
-    <section id="activity" class="wrap reveal">
-      <div class="sec-head"><span class="sec-n">05 /</span><h2>GitHub activity</h2></div>
-      <p class="section-note">LIVE CONTRIBUTION GRAPH — REGENERATED DAILY, SELF-HOSTED. FIGURES ARE PUBLIC AND VERIFIABLE ON GITHUB</p>
-
-      {hasStats && (
-        <div class="stats">
-          <p class="stat-l">
-            {mix.length > 0 ? 'CONTRIBUTION MIX · ' : ''}{num(ghStats.total)} CONTRIBUTIONS IN {ghStats.year}
-          </p>
-          {mix.length > 0 && (
-            <dl class="mix">
-              {mix.map((r) => (
-                <div class="mix-row">
-                  <dt>{r.label}</dt>
-                  <dd>
-                    {/* Unitless fraction, not a percentage — scaleX() takes a number. */}
-                    <span class="mix-bar" style={`--pct:${r.pct / 100}`} aria-hidden="true"></span>
-                    <span class="mix-pct">{r.pct}%</span>
-                  </dd>
+    <section id="work" aria-labelledby="work-h">
+      <div class="col inner sec-head"><h2 id="work-h">Projects</h2><span class="aside">Each runs on its own data</span></div>
+      <div class="rule"></div>
+      <div class="col inner sec-body">
+        <div class="cards">
+          {bySlug['job-market-insights'] && (() => { const p = bySlug['job-market-insights']; return (
+            <article class="card card--wide" data-tags="data" style="--c:var(--c-jobs)">
+              <div class="preview" id="explorer">
+                <div class="badges"><span class="badge badge--live">Shipped</span><span class="badge badge--data">Live data</span></div>
+                <div class="seg" role="group" aria-label="Filter by state">
+                  {jm.views.map((v, i) => <button type="button" data-view={v.id} aria-pressed={i === 0 ? 'true' : 'false'}>{v.label}</button>)}
                 </div>
-              ))}
-            </dl>
-          )}
-          {ghStats.topRepos.length > 0 && (
-            <ol class="top-repos">
-              {ghStats.topRepos.map((r, i) => (
-                <li>
-                  <span class="rank">{String(i + 1).padStart(2, '0')}</span>
-                  <a href={r.url}>{r.name}</a>
-                  <span class="repo-commits">{num(r.commits)} commits</span>
-                </li>
-              ))}
-            </ol>
-          )}
-          {ghStats.repoCount > 3 && (
-            <p class="stat-more">AND {num(ghStats.repoCount - 3)} OTHER PUBLIC REPOSITORIES</p>
+                <p class="ex-read" aria-live="polite"><b id="ex-ads">{num(all.ads)}</b> ads in <span id="ex-place">{all.name}</span>, top skills</p>
+                <ol class="bars" id="ex-bars">
+                  {all.skills.map(([k, n], i) => <li style={`--i:${i}`}><span class="k">{k}</span><span class="track"><span class="fill" style={`--v:${(n / maxAll).toFixed(3)}`}></span></span><span class="n">{num(n)}</span></li>)}
+                </ol>
+                <p class="ex-note">Go is left out: {num(jm.note.tagged)} ads were tagged with it, only {num(jm.note.genuine)} mean the language.</p>
+              </div>
+              <div class="card-body">
+                <div class="card-title"><span class="tile-icon" set:html={'<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 19V11M10 19V6M15 19v-9M20 19V4"/></svg>'} /><h3>{p.name}</h3></div>
+                <p>{p.tagline}. Pick a state above: the chart runs on the cleaned dataset.</p>
+                <details class="eng"><summary>Show engineering details</summary><p>{p.description}</p></details>
+                <div class="card-foot"><div class="chips">{p.stack.map((t) => <span class="chip">{t}</span>)}</div><a class="icon-btn" href={p.repo} aria-label={`${p.name} on GitHub`} set:html={icon.github}></a></div>
+              </div>
+            </article>
+          ); })()}
+
+          {bySlug['beats-externship'] && (() => { const p = bySlug['beats-externship']; return (
+            <article class="card" data-tags="data nlp" style="--c:var(--c-beats)">
+              <div class="preview">
+                <div class="badges"><span class="badge badge--live">Shipped</span><span class="badge badge--data">{num(beats.reviews)} reviews</span></div>
+                <ol class="dotplot" aria-label="Average star rating per product">
+                  {beats.products.map(([k, m]) => <li><span class="k">{k}</span><span class="axis"><span class="pt" style={`--x:${ax(m)}`}></span></span><span class="n">{m.toFixed(2)}</span></li>)}
+                </ol>
+                <div class="scale" aria-hidden="true"><span></span><span><span>3.5</span><span>4.0</span><span>4.5</span></span><span></span></div>
+              </div>
+              <div class="card-body">
+                <div class="card-title"><span class="tile-icon" set:html={'<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 15v-3a8 8 0 0 1 16 0v3M4 15a2 2 0 0 0 2 2h1v-5H6a2 2 0 0 0-2 2Zm16 0a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2Z"/></svg>'} /><h3>{p.name}</h3></div>
+                <p>{p.tagline}.</p>
+                <details class="eng"><summary>Show engineering details</summary><p>{p.description}</p></details>
+                <div class="card-foot"><div class="chips">{p.stack.slice(0, 3).map((t) => <span class="chip">{t}</span>)}</div><a class="icon-btn" href={p.repo} aria-label={`${p.name} on GitHub`} set:html={icon.github}></a></div>
+              </div>
+            </article>
+          ); })()}
+
+          {bySlug['runway-radar'] && (() => { const p = bySlug['runway-radar']; return (
+            <article class="card" data-tags="nlp llm" style="--c:var(--c-runway)">
+              <div class="preview" role="img" aria-label="Runway Radar pipeline: runway images and editorial text feed one trend score">
+                <div class="badges"><span class="badge badge--live">Shipped</span><span class="badge badge--data">Multi-modal</span></div>
+                <ol class="flow">
+                  <li><span class="s">image</span><strong>Runway shots</strong><span>CLIP-style embeddings, palettes</span></li>
+                  <li><span class="s">text</span><strong>Editorial copy</strong><span>Transformer and VADER sentiment</span></li>
+                  <li class="out"><span class="s">score</span><strong>Rising or declining</strong><span>Styles, colours, brands</span></li>
+                </ol>
+              </div>
+              <div class="card-body">
+                <div class="card-title"><span class="tile-icon" set:html={'<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M8 3 4 6l2 4 2-1v12h8V9l2 1 2-4-4-3c-.5 1.5-2 2.5-4 2.5S8.5 4.5 8 3Z"/></svg>'} /><h3>{p.name}</h3></div>
+                <p>{p.tagline}.</p>
+                <details class="eng"><summary>Show engineering details</summary><p>{p.description}</p></details>
+                <div class="card-foot"><div class="chips">{p.stack.slice(0, 3).map((t) => <span class="chip">{t}</span>)}</div><a class="icon-btn" href={p.repo} aria-label={`${p.name} on GitHub`} set:html={icon.github}></a></div>
+              </div>
+            </article>
+          ); })()}
+
+        </div>
+      </div>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <section id="experience" aria-labelledby="exp-h">
+      <div class="col inner sec-head"><h2 id="exp-h">Experience</h2><span class="aside"><span style="color:var(--dxb)">Dubai</span> and <span style="color:var(--mel)">Melbourne</span></span></div>
+      <div class="rule"></div>
+      <div class="col inner sec-body">
+        <ol class="jobs">
+          {profile.experience.map((j) => (
+            <li class={`job ${cityOf(j.place)}`}>
+              <span class="mark" aria-hidden="true">{j.org[0]}</span>
+              <div>
+                <div class="job-top"><h3>{j.role} <span>at {j.org}</span></h3><span class="when-wrap"><span class="when">{j.start} to {j.end}</span><span class="dur">{duration(j.start, j.end)}</span></span></div>
+                <p class="where">{j.place}</p>
+                <ul>{j.points.map((pt) => <li>{pt}</li>)}</ul>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <section id="research" aria-labelledby="res-h">
+      <div class="col inner sec-head"><h2 id="res-h">Research</h2><a class="aside ilink" href={profile.scholar}>Google Scholar</a></div>
+      <div class="rule"></div>
+      <div class="col inner sec-body">
+        <ol class="papers">
+          {profile.publications.map((pub) => (
+            <li>
+              {pub.url
+                ? <a class="paper" href={pub.url}><div class="paper-top"><span>{pub.type}</span><span>{pub.year}</span></div><h3>{pub.title}</h3><p>{pub.venue}</p></a>
+                : <div class="paper"><div class="paper-top"><span>{pub.type}</span><span>{pub.year}</span></div><h3>{pub.title}</h3><p>{pub.venue}</p></div>}
+            </li>
+          ))}
+        </ol>
+        <div class="certs">
+          <h3>Certifications</h3>
+          <ul>{profile.certifications.map((c) => <li><span>{c.name}</span><span>{c.issuer}, {c.year}</span></li>)}</ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <section id="github" aria-labelledby="gh-h">
+      <div class="col inner sec-head"><h2 id="gh-h">GitHub</h2><a class="aside ilink" href={profile.contact.github}>@yousufagha</a></div>
+      <div class="rule"></div>
+      <div class="col inner sec-body">
+        <div class="gh">
+          <div class="gh-top"><span>{hasStats ? <><b>{num(ghStats.total)}</b> contributions in {ghStats.year}</> : <>Contributions in {year}</>}</span><span>Rebuilt daily</span></div>
+          {graphSvg ? <div role="img" aria-label={`GitHub contribution graph, ${year}`} set:html={graphSvg} /> : <img src="/github-contribution.svg" alt={`GitHub contribution graph, ${year}`} width="747" height="103" style="width:100%;height:auto" />}
+          {hasStats && topRepos.length > 0 && (
+            <ul class="repos">
+              {topRepos.map((r) => <li><a href={r.url}>{r.name.replace('yousufagha/', '')}</a><span>{num(r.commits)} commits</span></li>)}
+              {otherRepos > 0 && <li><span>and {num(otherRepos)} more public</span><span></span></li>}
+            </ul>
           )}
         </div>
-      )}
-      <a class="gh-card" href="https://github.com/yousufagha" aria-label="Yousuf Agha's GitHub contribution graph">
-        <img
-          src={`/github-contribution.svg?v=${assetV}`}
-          alt={`GitHub contribution graph for yousufagha, ${new Date().getFullYear()}`}
-          loading="lazy" />
-        <span class="gh-foot">github.com/yousufagha →</span>
-      </a>
-    </section>
-
-    <section id="contact" class="wrap reveal">
-      <div class="sec-head"><span class="sec-n">06 /</span><h2>Contact</h2></div>
-      <p>Open to AI, data science, and ML engineering roles in Melbourne and remote across Australia.</p>
-      <div class="contact-links">
-        <a href={`mailto:${profile.contact.email}`}>{profile.contact.email}</a>
-        <a href={profile.contact.github}>github.com/yousufagha</a>
-        <a href={profile.contact.linkedin}>linkedin.com/in/yousuf-agha</a>
-        <a href={profile.contact.x}>x.com/drsmartfish</a>
-        <a href={profile.scholar}>google scholar</a>
       </div>
     </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <section id="contact" aria-labelledby="contact-h">
+      <div class="col inner cta">
+        <h2 id="contact-h">Scrolled this far?</h2>
+        <p>{profile.availability} {profile.workRights}</p>
+        <div class="links">
+          <a class="pill pill--solid" href={`mailto:${profile.contact.email}`}><span set:html={icon.mail} />{profile.contact.email}</a>
+          <button class="pill" type="button" data-copy="email" data-value={profile.contact.email} aria-label="Copy email address"><span set:html={icon.copy} /><span class="label">Copy</span><span class="done">Copied</span></button>
+          <a class="pill" href={profile.contact.linkedin}><span set:html={icon.linkedin} />LinkedIn</a>
+          <a class="pill" href={profile.contact.x}><span set:html={icon.x} />X</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="rule"></div>
+    <footer>
+      <div class="col inner"><span>© {year} {profile.name}</span><span>Designed and built by me, in Dubai</span></div>
+    </footer>
   </main>
 
-  <footer>
-    <div class="wrap">
-      <span>© {new Date().getFullYear()} YOUSUF AGHA</span>
-      <span>LAST BUILT {built.toUpperCase()} · UPDATED ALONGSIDE THE SCOREBOARD</span>
-    </div>
-  </footer>
+  <dialog class="pal" id="pal" aria-label="Search the site">
+    <input type="text" id="pal-q" placeholder="Search projects, sections and actions" autocomplete="off" />
+    <ul role="listbox">{palette.map((it, i) => <li role="option" aria-selected={i === 0 ? 'true' : 'false'} data-href={it.href} data-action={it.action}><span>{it.label}</span><span class="g">{it.group}</span></li>)}</ul>
+    <p class="empty" hidden>Nothing matches that.</p>
+  </dialog>
+
+  <script type="application/json" id="ex-data" set:html={JSON.stringify(jm.views)} />
 
   <script is:inline>
     (function () {
-      var STAGGER_MS = 40; /* skill §16.6: restraint. Perceptible, never a queue. */
+      var root = document.documentElement;
+      requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.add('ready'); }); });
 
-      function showAll() {
-        document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
-        document.querySelectorAll('.project').forEach(function (el) { el.classList.add('shown'); });
+      var themeBtn = document.getElementById('theme');
+      function toggleTheme() {
+        var light = root.getAttribute('data-theme') !== 'light';
+        if (light) root.setAttribute('data-theme', 'light'); else root.removeAttribute('data-theme');
+        try { localStorage.setItem('theme', light ? 'light' : 'dark'); } catch (e) {}
+        var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', light ? '#FAFAFA' : '#09090B');
       }
+      themeBtn.addEventListener('click', toggleTheme);
 
-      /* Reduced motion still reveals — it just arrives without the travel
-         (skill §14: a gentler equivalent, not the absence of feedback). */
-      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduced || !('IntersectionObserver' in window)) { showAll(); return; }
+      var clock = document.getElementById('clock');
+      function tick() { try { clock.textContent = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Dubai' }).format(new Date()) + ' GST'; } catch (e) {} }
+      tick(); setInterval(tick, 30000);
 
-      function reveal(section) {
-        section.classList.add('in');
-        var cards = section.querySelectorAll('.project');
-        cards.forEach(function (card, i) {
-          setTimeout(function () { card.classList.add('shown'); }, i * STAGGER_MS);
+      var canCopy = !!(navigator.clipboard && window.isSecureContext);
+      function copyValue(btn) {
+        if (!btn) return;
+        var v = btn.getAttribute('data-value');
+        if (!canCopy) { if (btn.getAttribute('data-copy') === 'email') location.href = 'mailto:' + v; return; }
+        navigator.clipboard.writeText(v).then(function () { btn.classList.add('is-done'); setTimeout(function () { btn.classList.remove('is-done'); }, 1800); });
+      }
+      document.querySelectorAll('[data-copy]').forEach(function (b) { b.addEventListener('click', function () { copyValue(b); }); });
+
+      /* The plane flies only when motion is welcome. */
+      var svgEl = document.querySelector('.banner svg');
+      if (svgEl && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches && svgEl.pauseAnimations) { svgEl.setCurrentTime(2.3); svgEl.pauseAnimations(); }
+
+      var data = JSON.parse(document.getElementById('ex-data').textContent);
+      var fmt = new Intl.NumberFormat('en-AU');
+      var bars = document.getElementById('ex-bars'), ads = document.getElementById('ex-ads'), place = document.getElementById('ex-place');
+      var segs = document.querySelectorAll('.seg button');
+      segs.forEach(function (b) {
+        b.addEventListener('click', function () {
+          var v = data.filter(function (d) { return d.id === b.getAttribute('data-view'); })[0]; if (!v) return;
+          var max = v.skills[0][1];
+          v.skills.forEach(function (s, i) { var li = bars.children[i]; if (!li) return; li.querySelector('.k').textContent = s[0]; li.querySelector('.n').textContent = fmt.format(s[1]); li.querySelector('.fill').style.setProperty('--v', (s[1] / max).toFixed(3)); });
+          ads.textContent = fmt.format(v.ads); place.textContent = v.name;
+          segs.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
         });
+      });
+
+      var filters = document.querySelectorAll('[data-filter]');
+      filters.forEach(function (f) {
+        f.addEventListener('click', function () {
+          var t = f.getAttribute('data-filter');
+          document.querySelectorAll('.card').forEach(function (c) { c.hidden = t !== 'all' && (' ' + c.getAttribute('data-tags') + ' ').indexOf(' ' + t + ' ') === -1; });
+          filters.forEach(function (x) { x.setAttribute('aria-pressed', x === f ? 'true' : 'false'); });
+        });
+      });
+
+      var links = {}; document.querySelectorAll('[data-index]').forEach(function (a) { links[a.getAttribute('data-index')] = a; });
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (es) {
+          es.forEach(function (e) { if (e.isIntersecting) { Object.keys(links).forEach(function (k) { links[k].setAttribute('aria-current', k === e.target.id ? 'true' : 'false'); }); } });
+        }, { rootMargin: '-35% 0px -60% 0px' });
+        Object.keys(links).forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
       }
 
-      try {
-        var io = new IntersectionObserver(function (entries) {
-          entries.forEach(function (e) {
-            if (e.isIntersecting) { reveal(e.target); io.unobserve(e.target); }
-          });
-        }, { rootMargin: '0px 0px -8% 0px' });
-        document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
-      } catch (err) {
-        /* Never leave the page hidden because of a scroll effect. */
-        showAll();
+      var dlg = document.getElementById('pal'); if (typeof dlg.showModal !== 'function') return;
+      var q = document.getElementById('pal-q'); var items = Array.prototype.slice.call(dlg.querySelectorAll('li')); var empty = dlg.querySelector('.empty');
+      function vis() { return items.filter(function (li) { return !li.hidden; }); }
+      function sel(i) { var v = vis(); items.forEach(function (li) { li.setAttribute('aria-selected', 'false'); }); if (v[i]) { v[i].setAttribute('aria-selected', 'true'); v[i].scrollIntoView({ block: 'nearest' }); } }
+      function cur() { var v = vis(); for (var i = 0; i < v.length; i++) if (v[i].getAttribute('aria-selected') === 'true') return i; return 0; }
+      function filter() { var t = q.value.trim().toLowerCase(); items.forEach(function (li) { li.hidden = !!t && li.textContent.toLowerCase().indexOf(t) === -1; }); empty.hidden = vis().length > 0; sel(0); }
+      function run(li) {
+        var href = li.getAttribute('data-href'), act = li.getAttribute('data-action'); dlg.close();
+        if (act === 'theme') toggleTheme();
+        else if (act === 'copy-email') copyValue(document.querySelector('[data-copy="email"]'));
+        else if (act === 'copy-prompt') copyValue(document.querySelector('[data-copy="prompt"]'));
+        else if (href && href.charAt(0) === '#') { var el = document.querySelector(href); if (el) el.scrollIntoView(); history.replaceState(null, '', href); }
+        else if (href) location.href = href;
       }
+      function open() { q.value = ''; filter(); dlg.showModal(); q.focus(); }
+      document.querySelectorAll('[data-open-palette]').forEach(function (b) { b.addEventListener('click', open); });
+      document.addEventListener('keydown', function (e) { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); dlg.open ? dlg.close() : open(); } });
+      q.addEventListener('input', filter);
+      q.addEventListener('keydown', function (e) { var v = vis(), i = cur(); if (e.key === 'ArrowDown') { e.preventDefault(); sel(Math.min(v.length - 1, i + 1)); } else if (e.key === 'ArrowUp') { e.preventDefault(); sel(Math.max(0, i - 1)); } else if (e.key === 'Enter') { e.preventDefault(); if (v[i]) run(v[i]); } });
+      items.forEach(function (li) { li.addEventListener('click', function () { run(li); }); li.addEventListener('mousemove', function () { sel(vis().indexOf(li)); }); });
+      dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
     })();
   </script>
 </body>
